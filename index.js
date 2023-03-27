@@ -38,7 +38,7 @@ app.get("/:id", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hi");
+  res.json({ message: "Higggsdf" });
 });
 
 app.listen(PORT, () => {
