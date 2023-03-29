@@ -1,11 +1,18 @@
 const express = require("express");
 const cors = require("cors");
+const logger = require("./utils/logger");
+const config = require("./utils/config");
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-const PORT = 4001;
-const urls = {};
+const PORT = config.PORT;
+let urls = [
+  {
+    originUrl: "https://chat.openai.com/chat",
+    shortUrl: "AAAAAA",
+  },
+];
 function generateRandomString() {
   const characters =
     "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -15,32 +22,30 @@ function generateRandomString() {
   }
   return result;
 }
-
 app.post("/shorten", (req, res) => {
   const { url } = req.body;
   const randomString = generateRandomString();
-  const shortUrl = `http://localhost:${PORT}/${randomString}`;
+  const shortUrl = `${randomString}`;
 
-  urls[randomString] = url;
+  urls = urls.concat({ originUrl: url, shortUrl: shortUrl });
 
   res.json({ shortUrl });
 });
 
 app.get("/:id", (req, res) => {
   const { id } = req.params;
-  const url = urls[id];
-
+  const url = urls.find((url) => url.shortUrl === id);
   if (url) {
-    res.redirect(url);
+    res.redirect(url.originUrl);
   } else {
     res.status(404).json({ error: "URL not found" });
   }
 });
 
 app.get("/", (req, res) => {
-  res.json({ message: "Higggsdf" });
+  return res.json({ urls });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT} http://localhost:${PORT}/`);
+  logger.info(`Server is running on port ${PORT} http://localhost:${PORT}/`);
 });
