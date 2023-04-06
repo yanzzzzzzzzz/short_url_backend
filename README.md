@@ -8,9 +8,12 @@ The Short URL Backend is a service that provides URL shortening functionality to
 
 To get started with the Short URL Backend, you need to perform the following steps:
 
-1. Clone the repository: git clone <https://github.com/<your_username>/short-url-backend.git>
-2. Install dependencies: npm install
-3. Create a .env file with the following information:
+1. Clone the repository: 
+```
+git clone https://github.com/yanzzzzzzzzz/short_url_backend.git
+```
+1. Install dependencies: npm install
+2. Create a .env file with the following information:
 
 ```makefile
 PORT=<your_port_number>
