@@ -1,3 +1,4 @@
+const config = require("./utils/config");
 const mongoose = require("mongoose");
 
 if (process.argv.length < 3) {
@@ -7,10 +8,7 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
-const pd = process.argv[2];
-
-const connectDBUrl = `mongodb+srv://fullstack:${pd}@cluster0.pm9okyd.mongodb.net/URLShortenerDB?retryWrites=true&w=majority`;
-mongoose.connect(connectDBUrl);
+mongoose.connect(config.MONGODB_URI);
 
 const urlSchema = new mongoose.Schema({
   originUrl: String,

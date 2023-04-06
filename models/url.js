@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
-
-const connectString = `mongodb+srv://fullstack:1234@cluster0.pm9okyd.mongodb.net/URLShortenerDB?retryWrites=true&w=majority`;
+const config = require("../utils/config");
 
 mongoose
-  .connect(connectString)
+  .connect(config.MONGODB_URI)
   .then(() => {
     console.log("connected to MongoDB");
   })

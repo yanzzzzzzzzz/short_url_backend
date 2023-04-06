@@ -1,4 +1,4 @@
-POST http://localhost:4001/
+POST http://localhost:4001/api/url
 Content-Type: application/json
 
 {

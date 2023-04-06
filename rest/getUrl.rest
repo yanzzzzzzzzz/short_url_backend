@@ -1,2 +1,2 @@
-Get http://localhost:4001/AAAAAA
+Get http://localhost:4001/api/url/YBJYR8
 Content-Type: application/json
