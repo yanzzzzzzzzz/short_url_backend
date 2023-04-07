@@ -10,25 +10,25 @@ To get started with the Short URL Backend, you need to perform the following ste
 
 Clone the repository:
 
-```makefile
+```bash
 git clone https://github.com/yanzzzzzzzzz/short_url_backend.git
 ```
 
 Install dependencies:
 
-```makefile
+```bash
 npm install
 ```
 
 Create a .env file with the following information:
 
-```makefile
+```bash
 PORT=<your_port_number>
 MONGODB_URI=<your_mongodb_uri>
 ```
 
 Start the server:
 
-```npm
+```bash
 npm start
 ```
