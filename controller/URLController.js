@@ -47,7 +47,7 @@ UrlRouter.get("/:shortUrl", (req, res) => {
 
 UrlRouter.get("/", (req, res) => {
   Url.find({}).then((result) => {
-    return res.json({ result });
+    return res.json(result);
   });
 });
 
