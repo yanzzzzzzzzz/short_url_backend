@@ -22,24 +22,26 @@ beforeEach(async () => {
   urlObject = new Url(initialUrls[1]);
   await urlObject.save();
 });
-test("url are returned as json", async () => {
+test("GET /api/url should return urls as JSON", async () => {
   await api
     .get("/api/url")
     .expect(200)
     .expect("Content-Type", /application\/json/);
 }, 100000);
 
-test("there are X url", async () => {
+test("GET /api/url should return the correct number of urls", async () => {
   const response = await api.get("/api/url");
 
-  expect(response.body).toHaveLength(2);
+  expect(response.body).toHaveLength(initialUrls.length);
 });
 
-test("the first url is about HTTP methods", async () => {
+test("GET /api/url should return initial urls", async () => {
   const response = await api.get("/api/url");
-
-  expect(response.body[0].shortUrl).toBe("AAAAAA");
-  expect(response.body[1].shortUrl).toBe("yanzzzzzzzzz");
+  let index = 0;
+  initialUrls.forEach((url) => {
+    expect(response.body[index].originUrl).toBe(url.originUrl);
+    expect(response.body[index++].shortUrl).toBe(url.shortUrl);
+  });
 });
 
 afterAll(() => {
