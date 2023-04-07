@@ -20,7 +20,7 @@ Install dependencies:
 npm install
 ```
 
-Create a .env file with the following information:
+Create a `.env` file with the following information:
 
 ```bash
 PORT=<your_port_number>
@@ -30,5 +30,5 @@ MONGODB_URI=<your_mongodb_uri>
 Start the server:
 
 ```bash
-npm start
+npm run dev
 ```
