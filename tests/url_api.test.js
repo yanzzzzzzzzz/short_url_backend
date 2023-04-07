@@ -44,6 +44,20 @@ test("GET /api/url should return initial urls", async () => {
   });
 });
 
+test("a valid url can be added", async () => {
+  const newUrl = "https://www.google.com.tw/";
+  await api
+    .post("/api/url")
+    .send({ url: newUrl })
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+  const response = await api.get("/api/url");
+
+  const originUrls = response.body.map((r) => r.originUrl);
+
+  expect(response.body).toHaveLength(initialUrls.length + 1);
+  expect(originUrls).toContain(newUrl);
+});
 afterAll(() => {
   mongoose.connection.close();
 });
