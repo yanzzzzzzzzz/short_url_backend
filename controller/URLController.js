@@ -12,7 +12,7 @@ function generateRandomString() {
   return result;
 }
 
-UrlRouter.post("/", (req, res) => {
+UrlRouter.post("/", async (req, res) => {
   const { url } = req.body;
   const randomString = generateRandomString();
   const shortUrl = `${randomString}`;
@@ -20,35 +20,29 @@ UrlRouter.post("/", (req, res) => {
     originUrl: url,
     shortUrl: shortUrl,
   });
-  urlModel
-    .save()
-    .then((savedUrl) => {
-      res.json(savedUrl);
-    })
-    .catch((error) => {
-      console.log("error", error);
-      res.status(404).json({ error: error });
-    });
-});
 
-UrlRouter.get("/:shortUrl", (req, res) => {
-  const { shortUrl } = req.params;
-  if (shortUrl) {
-    console.log("shortUrl", shortUrl);
-    Url.findOne({ shortUrl }).then((url) => {
-      if (url) {
-        res.redirect(url.originUrl);
-      } else {
-        res.status(404).json({ error: "URL not found" });
-      }
-    });
+  try {
+    await urlModel.save();
+    res.status(201).json(urlModel);
+  } catch (error) {
+    console.log("error", error);
+    res.status(404).json({ error: error });
   }
 });
 
-UrlRouter.get("/", (req, res) => {
-  Url.find({}).then((result) => {
-    return res.json(result);
-  });
+UrlRouter.get("/:shortUrl", async (req, res) => {
+  const { shortUrl } = req.params;
+  const url = await Url.findOne({ shortUrl });
+  if (url) {
+    res.redirect(url.originUrl);
+  } else {
+    res.status(404).json({ error: "URL not found" });
+  }
+});
+
+UrlRouter.get("/", async (req, res) => {
+  const urls = await Url.find({});
+  return res.json(urls);
 });
 
 module.exports = UrlRouter;
