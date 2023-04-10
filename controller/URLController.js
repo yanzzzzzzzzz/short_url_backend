@@ -21,7 +21,7 @@ function isValidUrl(string) {
   return true;
 }
 
-UrlRouter.post("/", async (req, res, next) => {
+UrlRouter.post("/", async (req, res) => {
   const { url } = req.body;
   if (!isValidUrl(url)) {
     res.status(400).json({ error: "url is invalid" }).end();

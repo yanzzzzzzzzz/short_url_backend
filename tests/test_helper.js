@@ -12,9 +12,13 @@ const initialUrls = [
 ];
 const vaildUrl = "https://www.google.com.tw/";
 const invaildUrl = "asd.tw";
-
+const urlsInDb = async () => {
+  const urls = await Url.find({});
+  return urls.map((url) => url.toJSON());
+};
 module.exports = {
   initialUrls,
   vaildUrl,
   invaildUrl,
+  urlsInDb,
 };
