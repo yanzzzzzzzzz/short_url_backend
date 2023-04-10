@@ -12,21 +12,34 @@ function generateRandomString() {
   return result;
 }
 
+function isValidUrl(string) {
+  try {
+    new URL(string);
+  } catch (_) {
+    return false;
+  }
+  return true;
+}
+
 UrlRouter.post("/", async (req, res) => {
   const { url } = req.body;
-  const randomString = generateRandomString();
-  const shortUrl = `${randomString}`;
-  const urlModel = new Url({
-    originUrl: url,
-    shortUrl: shortUrl,
-  });
+  if (!isValidUrl(url)) {
+    res.status(400).json({ error: "url is invalid" });
+  } else {
+    const randomString = generateRandomString();
+    const shortUrl = `${randomString}`;
+    const urlModel = new Url({
+      originUrl: url,
+      shortUrl: shortUrl,
+    });
 
-  try {
-    await urlModel.save();
-    res.status(201).json(urlModel);
-  } catch (error) {
-    console.log("error", error);
-    res.status(404).json({ error: error });
+    try {
+      await urlModel.save();
+      res.status(201).json(urlModel);
+    } catch (error) {
+      console.log("error", error);
+      res.status(404).json({ error: error });
+    }
   }
 });
 
