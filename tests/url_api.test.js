@@ -85,6 +85,34 @@ describe("POST /api/url", () => {
   });
 });
 
+describe("DELETE api/url", () => {
+  test("should remove an existing URL", async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToDelete = urlAtStart[0];
+    await api.delete(`/api/url/${urlToDelete.shortUrl}`).expect(204);
+    const urlAtEnd = await helper.urlsInDb();
+    expect(urlAtEnd).toHaveLength(helper.initialUrls.length - 1);
+
+    const existShortUrl = urlAtEnd.map((url) => url.shortUrl);
+    expect(existShortUrl).not.toContain(urlToDelete.shortUrl);
+  });
+});
+
+describe("PUT api/url", () => {
+  test("shortUrl can update an existing URL's original URL", async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToUpdate = urlAtStart[0];
+    await api
+      .put(`/api/url/${urlToUpdate.shortUrl}`)
+      .send({ originUrl: helper.vaildUrl })
+      .expect(200);
+    const urlAtEnd = await helper.urlsInDb();
+    expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
+
+    expect(urlAtEnd[0].originUrl).toBe(helper.vaildUrl);
+  });
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
