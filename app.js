@@ -4,7 +4,18 @@ require("express-async-errors");
 const app = express();
 const UrlRouter = require("./controller/URLController");
 const middleware = require("./utils/middleware");
+const config = require("./utils/config");
+const mongoose = require("mongoose");
 app.use(cors());
+mongoose
+  .connect(config.MONGODB_URI)
+  .then(() => {
+    console.log("connected to MongoDB");
+  })
+  .catch((error) => {
+    console.log("error connecting to MongoDB:", error.message);
+  });
+
 app.use(express.json());
 app.use(middleware.requestLogger);
 app.use("/api/url", UrlRouter);
