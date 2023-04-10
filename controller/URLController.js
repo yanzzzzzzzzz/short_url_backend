@@ -21,10 +21,10 @@ function isValidUrl(string) {
   return true;
 }
 
-UrlRouter.post("/", async (req, res) => {
+UrlRouter.post("/", async (req, res, next) => {
   const { url } = req.body;
   if (!isValidUrl(url)) {
-    res.status(400).json({ error: "url is invalid" });
+    res.status(400).json({ error: "url is invalid" }).end();
   } else {
     const randomString = generateRandomString();
     const shortUrl = `${randomString}`;
@@ -32,14 +32,8 @@ UrlRouter.post("/", async (req, res) => {
       originUrl: url,
       shortUrl: shortUrl,
     });
-
-    try {
-      await urlModel.save();
-      res.status(201).json(urlModel);
-    } catch (error) {
-      console.log("error", error);
-      res.status(404).json({ error: error });
-    }
+    await urlModel.save();
+    res.status(201).json(urlModel);
   }
 });
 
@@ -49,7 +43,7 @@ UrlRouter.get("/:shortUrl", async (req, res) => {
   if (url) {
     res.redirect(url.originUrl);
   } else {
-    res.status(404).json({ error: "URL not found" });
+    res.status(404).end();
   }
 });
 

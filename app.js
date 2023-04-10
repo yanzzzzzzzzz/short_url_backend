@@ -1,10 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+require("express-async-errors");
 const app = express();
 const UrlRouter = require("./controller/URLController");
-
+const middleware = require("./utils/middleware");
 app.use(cors());
 app.use(express.json());
-
+app.use(middleware.requestLogger);
 app.use("/api/url", UrlRouter);
+app.use(middleware.errorHandler);
+app.use(middleware.unknownEndpoint);
 module.exports = app;
