@@ -52,4 +52,32 @@ UrlRouter.get("/", async (req, res) => {
   return res.json(urls);
 });
 
+UrlRouter.delete("/:shortUrl", async (req, res) => {
+  const { shortUrl } = req.params;
+  console.log("shortUrl", shortUrl);
+  const url = await Url.findOne({ shortUrl: shortUrl });
+  if (url) {
+    await Url.findByIdAndDelete(url._id);
+    res.status(204).end();
+  } else {
+    res.status(404).end();
+  }
+});
+
+UrlRouter.put("/:shortUrl", async (req, res) => {
+  const { shortUrl } = req.params;
+  const { originUrl } = req.body;
+  console.log("shortUrl", shortUrl);
+  const url = await Url.findOne({ shortUrl: shortUrl });
+  if (url) {
+    await Url.findByIdAndUpdate(url._id, {
+      originUrl: originUrl,
+      shortUrl: url.shortUrl,
+    });
+    res.status(200).end();
+  } else {
+    res.status(404).end();
+  }
+});
+
 module.exports = UrlRouter;
