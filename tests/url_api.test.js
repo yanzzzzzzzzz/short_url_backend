@@ -113,6 +113,22 @@ describe("PUT api/url", () => {
   });
 });
 
+describe("PACTH api/url", () => {
+  test("update shortUrl", async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToPatch = urlAtStart[0];
+    await api
+      .patch(`/api/url/${urlToPatch.shortUrl}`)
+      .send({ shortUrl: helper.updateShortUrl })
+      .expect(200);
+
+    const urlAtEnd = await helper.urlsInDb();
+
+    // expect(urlAtEnd[0].shortUrl).not.toEqual(urlToPatch.shortUrl);
+    expect(urlAtEnd[0].shortUrl).toBe(helper.updateShortUrl);
+  });
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
