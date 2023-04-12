@@ -11,6 +11,15 @@ function generateRandomString() {
   }
   return result;
 }
+async function generateUniqueRandomString() {
+  let randomString = generateRandomString();
+  let existingUrl = await Url.findOne({ shortUrl: randomString });
+  while (existingUrl) {
+    randomString = generateRandomString();
+    existingUrl = await Url.findOne({ shortUrl: randomString });
+  }
+  return randomString;
+}
 
 function isValidUrl(string) {
   try {
@@ -26,7 +35,8 @@ UrlRouter.post("/", async (req, res) => {
   if (!isValidUrl(url)) {
     res.status(400).json({ error: "url is invalid" }).end();
   } else {
-    const randomString = generateRandomString();
+    let randomString = generateUniqueRandomString();
+
     const shortUrl = `${randomString}`;
     const urlModel = new Url({
       originUrl: url,
@@ -67,12 +77,25 @@ UrlRouter.delete("/:shortUrl", async (req, res) => {
 UrlRouter.put("/:shortUrl", async (req, res) => {
   const { shortUrl } = req.params;
   const { originUrl } = req.body;
-  console.log("shortUrl", shortUrl);
   const url = await Url.findOne({ shortUrl: shortUrl });
   if (url) {
     await Url.findByIdAndUpdate(url._id, {
       originUrl: originUrl,
       shortUrl: url.shortUrl,
+    });
+    res.status(200).end();
+  } else {
+    res.status(404).end();
+  }
+});
+
+UrlRouter.patch("/:shortUrl", async (req, res) => {
+  const { shortUrl } = req.params;
+  const { newShortUrl } = req.body;
+  const url = await Url.findOne({ shortUrl: shortUrl });
+  if (url) {
+    await Url.findByIdAndUpdate(url._id, {
+      shortUrl: newShortUrl,
     });
     res.status(200).end();
   } else {
