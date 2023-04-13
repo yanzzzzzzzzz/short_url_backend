@@ -40,3 +40,4 @@ npm run dev
 * POST /urls: Creates a new URL resource based on the request data.
 * DELETE /urls/:shortUrl: Removes the identified URL by its shortUrl identifier.
 * PUT /urls/:shortUrl: Replaces the entire identified URL with the request data.
+* PATCH /urls/:shortUrl: Updates a subset of properties of the identified URL with the request data.
