@@ -93,14 +93,20 @@ UrlRouter.patch("/:shortUrl", async (req, res) => {
   const { shortUrl } = req.params;
   const { newShortUrl } = req.body;
   const url = await Url.findOne({ shortUrl: shortUrl });
-  if (url) {
-    await Url.findByIdAndUpdate(url._id, {
-      shortUrl: newShortUrl,
-    });
-    res.status(200).end();
-  } else {
-    res.status(404).end();
+  if (!url) {
+    return res.status(404).end();
   }
+  if (url.shortUrl === newShortUrl) {
+    return res.status(200).end();
+  }
+  const existingUrl = await Url.findOne({ shortUrl: newShortUrl });
+  if (existingUrl) {
+    return res.status(409).end();
+  }
+
+  url.shortUrl = newShortUrl;
+  await url.save();
+  return res.status(200).end();
 });
 
 module.exports = UrlRouter;
