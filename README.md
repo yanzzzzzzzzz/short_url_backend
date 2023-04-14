@@ -25,6 +25,7 @@ Create a `.env` file with the following information:
 ```bash
 PORT=<your_port_number>
 MONGODB_URI=<your_mongodb_uri>
+SECRET = <secret_string_use_by_jwt_token>
 ```
 
 Start the server:
