@@ -30,7 +30,7 @@ usersRouter.post("", async (req, res) => {
 });
 
 usersRouter.get("/", async (req, res) => {
-  const users = await User.find({});
+  const users = await User.find({}).populate("urls");
   res.json(users);
 });
 module.exports = usersRouter;

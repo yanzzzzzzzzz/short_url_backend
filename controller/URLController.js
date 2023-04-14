@@ -1,5 +1,6 @@
 const UrlRouter = require("express").Router();
 const Url = require("../models/url");
+const User = require("../models/user");
 
 const characters =
   "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -31,19 +32,27 @@ function isValidUrl(string) {
 }
 
 UrlRouter.post("/", async (req, res) => {
-  const { url } = req.body;
+  const body = req.body;
+  const url = body.url;
+  const user = await User.findById(body.userId);
   if (!isValidUrl(url)) {
     res.status(400).json({ error: "url is invalid" }).end();
   } else {
-    let randomString = generateUniqueRandomString();
+    let randomString = await generateUniqueRandomString();
 
     const shortUrl = `${randomString}`;
     const urlModel = new Url({
       originUrl: url,
       shortUrl: shortUrl,
+      user: user?._id,
     });
-    await urlModel.save();
-    res.status(201).json(urlModel);
+    const savedUrl = await urlModel.save();
+    if (user) {
+      user.urls = user.urls.concat(savedUrl._id);
+      await user.save();
+    }
+
+    res.status(201).json(savedUrl);
   }
 });
 
@@ -58,7 +67,7 @@ UrlRouter.get("/:shortUrl", async (req, res) => {
 });
 
 UrlRouter.get("/", async (req, res) => {
-  const urls = await Url.find({});
+  const urls = await Url.find({}).populate("user", { username: 1, name: 1 });
   return res.json(urls);
 });
 
