@@ -6,6 +6,9 @@ const api = supertest(app);
 const helper = require("./test_helper");
 const puppeteer = require("puppeteer");
 const config = require("../utils/config");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 beforeEach(async () => {
   await Url.deleteMany({});
   await Url.insertMany(helper.initialUrls);
@@ -63,22 +66,50 @@ describe("URL shortener", () => {
 });
 
 describe("POST /api/url", () => {
+  let token = null;
+  let testUserName = "test";
+  beforeAll(async () => {
+    await User.deleteMany({});
+
+    const passwordHash = await bcrypt.hash("1234", 10);
+    const user = await new User({
+      username: testUserName,
+      passwordHash,
+    }).save();
+
+    const userToken = { username: testUserName, id: user.id };
+    return (token = jwt.sign(userToken, config.SECRET));
+  });
   test("adds a new url with valid input", async () => {
     await api
       .post("/api/url")
+      .set("Authorization", `bearer ${token}`)
       .send({ url: helper.vaildUrl })
       .expect(201)
       .expect("Content-Type", /application\/json/);
     const response = await api.get("/api/url");
-
     const originUrls = response.body.map((r) => r.originUrl);
 
     expect(response.body).toHaveLength(helper.initialUrls.length + 1);
+    expect(response.body[response.body.length - 1].user.username).toEqual(
+      testUserName
+    );
     expect(originUrls).toContain(helper.vaildUrl);
   });
 
   test("returns a 400 status with invalid input", async () => {
-    await api.post("/api/url").send({ url: helper.invaildUrl }).expect(400);
+    await api
+      .post("/api/url")
+      .set("Authorization", `bearer ${token}`)
+      .send({ url: helper.invaildUrl })
+      .expect(400);
+
+    const response = await api.get("/api/url");
+    expect(response.body).toHaveLength(helper.initialUrls.length);
+  });
+
+  test("rejects adding a new url with valid input but no token provided", async () => {
+    await api.post("/api/url").send({ url: helper.vaildUrl }).expect(401);
 
     const response = await api.get("/api/url");
     expect(response.body).toHaveLength(helper.initialUrls.length);
