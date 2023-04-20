@@ -34,7 +34,10 @@ function isValidUrl(string) {
 UrlRouter.post("/", async (req, res) => {
   const body = req.body;
   const url = body.url;
-  const user = await User.findById(body.userId);
+  const user = req.user;
+  if (!user) {
+    res.status(401).json({ error: "user not found" }).end();
+  }
   if (!isValidUrl(url)) {
     res.status(400).json({ error: "url is invalid" }).end();
   } else {
@@ -44,10 +47,10 @@ UrlRouter.post("/", async (req, res) => {
     const urlModel = new Url({
       originUrl: url,
       shortUrl: shortUrl,
-      user: user?._id,
+      user: user._id,
     });
     const savedUrl = await urlModel.save();
-    if (user) {
+    if (savedUrl != null) {
       user.urls = user.urls.concat(savedUrl._id);
       await user.save();
     }
@@ -73,7 +76,6 @@ UrlRouter.get("/", async (req, res) => {
 
 UrlRouter.delete("/:shortUrl", async (req, res) => {
   const { shortUrl } = req.params;
-  console.log("shortUrl", shortUrl);
   const url = await Url.findOne({ shortUrl: shortUrl });
   if (url) {
     await Url.findByIdAndDelete(url._id);
