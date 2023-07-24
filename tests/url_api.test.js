@@ -15,16 +15,17 @@ beforeEach(async () => {
 });
 
 describe("GET /api/url", () => {
+
   test("should return urls as JSON", async () => {
     await api
       .get("/api/url")
       .expect(200)
       .expect("Content-Type", /application\/json/);
   }, 100000);
-  test("should return the correct number of urls", async () => {
+  test("not login cant show any exist url", async () => {
     const response = await api.get("/api/url");
 
-    expect(response.body).toHaveLength(helper.initialUrls.length);
+    expect(response.body).toHaveLength(0);
   });
   test("should return initial urls", async () => {
     const response = await api.get("/api/url");
@@ -108,11 +109,11 @@ describe("POST /api/url", () => {
     expect(response.body).toHaveLength(helper.initialUrls.length);
   });
 
-  test("rejects adding a new url with valid input but no token provided", async () => {
-    await api.post("/api/url").send({ url: helper.vaildUrl }).expect(401);
+  test("adding a new url with valid input but no token provided is okay", async () => {
+    await api.post("/api/url").send({ url: helper.vaildUrl }).expect(201);
 
     const response = await api.get("/api/url");
-    expect(response.body).toHaveLength(helper.initialUrls.length);
+    expect(response.body).toHaveLength(helper.initialUrls.length + 1);
   });
 });
 
