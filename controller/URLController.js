@@ -35,9 +35,6 @@ UrlRouter.post("/", async (req, res) => {
   const body = req.body;
   const url = body.url;
   const user = req.user;
-  if (!user) {
-    res.status(401).json({ error: "user not found" }).end();
-  }
   if (!isValidUrl(url)) {
     res.status(400).json({ error: "url is invalid" }).end();
   } else {
@@ -47,10 +44,10 @@ UrlRouter.post("/", async (req, res) => {
     const urlModel = new Url({
       originUrl: url,
       shortUrl: shortUrl,
-      user: user._id,
+      user: user?._id,
     });
     const savedUrl = await urlModel.save();
-    if (savedUrl != null) {
+    if (savedUrl != null && user != null) {
       user.urls = user.urls.concat(savedUrl._id);
       await user.save();
     }
