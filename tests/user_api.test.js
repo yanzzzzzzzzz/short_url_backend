@@ -1,24 +1,29 @@
 const bcrypt = require("bcrypt");
 const supertest = require("supertest");
 const User = require("../models/user");
+const Url = require("../models/url");
 const helper = require("./test_helper");
 const app = require("../app");
 const api = supertest(app);
 describe("POST /api/users", () => {
+  const newUser = {username: "root", password:'sekert'};
   beforeEach(async () => {
     await User.deleteMany({});
-    const passwordHash = await bcrypt.hash("sekert", 10);
-    const user = new User({ username: "root", passwordHash });
-    await user.save();
+    for (let index = 0; index < helper.initialUsers.length; index++) {
+      const initialUser = helper.initialUsers[index];
+      const passwordHash = await bcrypt.hash(initialUser.password, 10);
+      const user = new User({ username: initialUser.username, name: initialUser.name, passwordHash });
+      await user.save();
+    }
   });
 
-  test("creation succeeds with a fresh username", async () => {
+  test("creation succeeds with a new username", async () => {
     const usersAtStart = await helper.usersInDb();
 
     const newUser = {
-      username: "mluukkai",
-      name: "Matti Luukkainen",
-      password: "salainen",
+      username: "test777",
+      name: "test777",
+      password: "test777",
     };
 
     await api
@@ -112,9 +117,30 @@ describe("GET /api/users", () => {
       });
       await user.save();
     }
+    const testUser = await User.findOne({ username:helper.initialUsers[0].username });
+    for (let index = 0; index < helper.initialUrls.length; index++) {
+      const urlData = helper.initialUrls[index];
+      const urlModel = new Url({
+        originUrl: urlData.originUrl,
+        shortUrl: urlData.shortUrl,
+        user: testUser._id,
+      });
+      const savedUrl = await urlModel.save();
+      testUser.urls = testUser.urls.concat(savedUrl._id);
+      await testUser.save();
+    }
   });
   test("get all user", async () => {
     const response = await api.get("/api/users");
     expect(response.body).toHaveLength(helper.initialUsers.length);
   });
+  test("should retrieve short URLs created by a specific user", async () => {
+    const existingUser  = helper.initialUsers[0];
+
+    const response = await api
+      .get(`/api/users/${existingUser.username}`)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+    expect(response.body.urls).toHaveLength(helper.initialUrls.length)
+  })
 });
