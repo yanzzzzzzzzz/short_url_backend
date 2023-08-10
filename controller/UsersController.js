@@ -33,4 +33,10 @@ usersRouter.get("/", async (req, res) => {
   const users = await User.find({}).populate("urls");
   res.json(users);
 });
+
+usersRouter.get("/:username", async (req, res) => {
+  const { username } = req.params;
+  const user = await User.findOne({ username });
+  res.json(user);
+});
 module.exports = usersRouter;
