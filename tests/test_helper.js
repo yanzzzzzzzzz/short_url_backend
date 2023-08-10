@@ -2,7 +2,7 @@ const Url = require("../models/url");
 const User = require("../models/user");
 const initialUrls = [
   {
-    originUrl: "https://chat.openai.com/chat",
+    originUrl: "https://disp.cc/b/",
     shortUrl: "AAAAAA",
   },
   {
