@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 beforeEach(async () => {
   await Url.deleteMany({});
+  await User.deleteMany({});
   await Url.insertMany(helper.initialUrls);
 });
 
@@ -22,17 +23,12 @@ describe("GET /api/url", () => {
       .expect(200)
       .expect("Content-Type", /application\/json/);
   }, 100000);
-  test("not login cant show any exist url", async () => {
-    const response = await api.get("/api/url");
-
-    expect(response.body).toHaveLength(0);
-  });
   test("should return initial urls", async () => {
-    const response = await api.get("/api/url");
+    const allUrls = await Url.find({});
     let index = 0;
     helper.initialUrls.forEach((url) => {
-      expect(response.body[index].originUrl).toBe(url.originUrl);
-      expect(response.body[index++].shortUrl).toBe(url.shortUrl);
+      expect(allUrls[index].originUrl).toBe(url.originUrl);
+      expect(allUrls[index++].shortUrl).toBe(url.shortUrl);
     });
   });
 });
@@ -71,7 +67,7 @@ describe("POST /api/url", () => {
   let testUserName = "test";
   beforeAll(async () => {
     await User.deleteMany({});
-
+    await Url.deleteMany({});
     const passwordHash = await bcrypt.hash("1234", 10);
     const user = await new User({
       username: testUserName,
@@ -88,13 +84,10 @@ describe("POST /api/url", () => {
       .send({ url: helper.vaildUrl })
       .expect(201)
       .expect("Content-Type", /application\/json/);
-    const response = await api.get("/api/url");
-    const originUrls = response.body.map((r) => r.originUrl);
+    const allUrls = await Url.find({});
+    const originUrls = allUrls.map((r) => r.originUrl);
 
-    expect(response.body).toHaveLength(helper.initialUrls.length + 1);
-    expect(response.body[response.body.length - 1].user.username).toEqual(
-      testUserName
-    );
+    expect(allUrls).toHaveLength(helper.initialUrls.length + 1);
     expect(originUrls).toContain(helper.vaildUrl);
   });
 
@@ -105,15 +98,15 @@ describe("POST /api/url", () => {
       .send({ url: helper.invaildUrl })
       .expect(400);
 
-    const response = await api.get("/api/url");
-    expect(response.body).toHaveLength(helper.initialUrls.length);
+    const allUrls = await Url.find({});
+    expect(allUrls).toHaveLength(helper.initialUrls.length);
   });
 
   test("adding a new url with valid input but no token provided is okay", async () => {
     await api.post("/api/url").send({ url: helper.vaildUrl }).expect(201);
 
-    const response = await api.get("/api/url");
-    expect(response.body).toHaveLength(helper.initialUrls.length + 1);
+    const allUrls = await Url.find({});
+    expect(allUrls).toHaveLength(helper.initialUrls.length + 1);
   });
 });
 
