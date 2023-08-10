@@ -11,9 +11,7 @@ const mongoose = require("mongoose");
 app.use(cors());
 mongoose
   .connect(config.MONGODB_URI)
-  .then(() => {
-    console.log("connected to MongoDB");
-  })
+  .then()
   .catch((error) => {
     console.log("error connecting to MongoDB:", error.message);
   });
