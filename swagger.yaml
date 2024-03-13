@@ -1,0 +1,212 @@
+swagger: '2.0'
+info:
+  title: Short URL API
+  version: 1.0.0
+paths:
+  /api/users:
+    post:
+      summary: Create a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                name:
+                  type: string
+                password:
+                  type: string
+      responses:
+        201:
+          description: User created successfully
+          schema:
+            type: object
+            properties:
+              _id:
+                type: string
+              username:
+                type: string
+              name:
+                type: string
+    get:
+      summary: Get a list of users
+      tags:
+        - Users
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+  /api/users/{username}:
+    get:
+      summary: Get user by username
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: username
+          required: true
+          type: string
+          description: The username of the user to retrieve
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/User'
+  /api/url:
+    post:
+      summary: Create a short url.
+      tags:
+        - URL
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: url
+          description: Create a short url.
+          schema:
+            type: object
+            required:
+              - url
+            properties:
+              url:
+                type: string
+      responses:
+        201:
+          description: URL created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/Url'
+        400:
+          description: Invalid URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+    get:
+      summary: Get user's URLs
+      tags:
+        - URL
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/Url'
+  /api/url/{shortUrl}:
+    get:
+      summary: Redirect to the original URL
+      tags:
+        - URL
+      parameters:
+        - in: path
+          name: shortUrl
+          required: true
+          type: string
+      responses:
+        302:
+          description: Redirect to the original URL
+        404:
+          description: URL not found
+    delete:
+      summary: Delete a URL
+      tags:
+        - URL
+      parameters:
+        - in: path
+          name: shortUrl
+          required: true
+          type: string
+      responses:
+        204:
+          description: URL deleted successfully
+        404:
+          description: URL not found
+    put:
+      summary: Update the original URL of a URL
+      tags:
+        - URL
+      parameters:
+        - in: path
+          name: shortUrl
+          required: true
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                originUrl:
+                  type: string
+              required:
+                - originUrl
+      responses:
+        200:
+          description: URL updated successfully
+        404:
+          description: URL not found
+    patch:
+      summary: Change the short URL of a URL
+      tags:
+        - URL
+      parameters:
+        - in: path
+          name: shortUrl
+          required: true
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newShortUrl:
+                  type: string
+              required:
+                - newShortUrl
+      responses:
+        200:
+          description: Short URL changed successfully
+        404:
+          description: URL not found
+        409:
+          description: Conflict - New short URL already exists
+
+definitions:
+  Url:
+    type: object
+    properties:
+      _id:
+        type: string
+      originUrl:
+        type: string
+      shortUrl:
+        type: string
+      user:
+        $ref: '#/definitions/User'
+  User:
+    type: object
+    properties:
+      _id:
+        type: string
+      username:
+        type: string
+      name:
+        type: string
