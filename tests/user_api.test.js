@@ -6,7 +6,6 @@ const helper = require("./test_helper");
 const app = require("../app");
 const api = supertest(app);
 describe("POST /api/users", () => {
-  const newUser = {username: "root", password:'sekert'};
   beforeEach(async () => {
     await User.deleteMany({});
     for (let index = 0; index < helper.initialUsers.length; index++) {
