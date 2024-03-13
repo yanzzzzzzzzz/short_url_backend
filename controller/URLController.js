@@ -67,8 +67,12 @@ UrlRouter.get("/:shortUrl", async (req, res) => {
 });
 
 UrlRouter.get("/", async (req, res) => {
+  const user = req.user;
+  if(user == null){
+    return res.json([])
+  }
   const urls = await Url.find({}).populate("user", { username: 1, name: 1 });
-  return res.json(urls);
+  return res.json(urls.filter(url => url.user && url.user.id === user.id));
 });
 
 UrlRouter.delete("/:shortUrl", async (req, res) => {
