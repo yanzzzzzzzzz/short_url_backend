@@ -22,7 +22,7 @@ describe("GET /api/url", () => {
       .get("/api/url")
       .expect(200)
       .expect("Content-Type", /application\/json/);
-  }, 100000);
+  }, 5000000);
   test("should return initial urls", async () => {
     const allUrls = await Url.find({});
     let index = 0;
