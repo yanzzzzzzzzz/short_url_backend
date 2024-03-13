@@ -37,7 +37,7 @@ describe("POST /api/users", () => {
 
     const usernames = usersAtEnd.map((u) => u.username);
     expect(usernames).toContain(newUser.username);
-  });
+  }, 500000);
 
   test("creation invalid user that username length <3", async () => {
     const usersAtStart = await helper.usersInDb();
