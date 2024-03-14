@@ -71,8 +71,9 @@ UrlRouter.get("/", async (req, res) => {
   if(user == null){
     return res.json([])
   }
-  const urls = await Url.find({}).populate("user", { username: 1, name: 1 });
-  return res.json(urls.filter(url => url.user && url.user.id === user.id));
+  const urlList = await User.findOne({ username: user.username })
+  .populate("urls", "originUrl shortUrl");
+  return res.json(urlList.urls);
 });
 
 UrlRouter.delete("/:shortUrl", async (req, res) => {
