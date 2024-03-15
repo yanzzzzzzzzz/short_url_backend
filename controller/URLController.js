@@ -80,6 +80,10 @@ UrlRouter.delete("/:shortUrl", async (req, res) => {
   const { shortUrl } = req.params;
   const url = await Url.findOne({ shortUrl: shortUrl });
   if (url) {
+    if(req.user._id.toString() !== url.user._id.toString()){
+      res.status(403).json({ error: "Unauthorized: Cannot delete URL created by another user" })
+      .end();
+    }
     await Url.findByIdAndDelete(url._id);
     res.status(204).end();
   } else {
@@ -89,12 +93,16 @@ UrlRouter.delete("/:shortUrl", async (req, res) => {
 
 UrlRouter.put("/:shortUrl", async (req, res) => {
   const { shortUrl } = req.params;
-  const { originUrl } = req.body;
+  const body = req.body;
   const url = await Url.findOne({ shortUrl: shortUrl });
   if (url) {
+    if(req.user._id.toString() !== url.user._id.toString()){
+      res.status(403).json({ error: "Unauthorized: Cannot modify URL created by another user" })
+      .end();
+    }
     await Url.findByIdAndUpdate(url._id, {
-      originUrl: originUrl,
-      shortUrl: url.shortUrl,
+      originUrl: body.originUrl,
+      shortUrl: body.shortUrl,
     });
     res.status(200).end();
   } else {

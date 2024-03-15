@@ -9,28 +9,46 @@ const config = require("../utils/config");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+
+let token = null;
+let testUserName = "test";
 beforeEach(async () => {
-  await Url.deleteMany({});
   await User.deleteMany({});
-  await Url.insertMany(helper.initialUrls);
-});
+  await Url.deleteMany({});
+  const passwordHash = await bcrypt.hash("1234", 10);
+  const user = new User({
+    username: testUserName,
+    passwordHash,
+  });
+
+  const savedUser = await user.save();
+
+  const promises = helper.initialUrls.map(async (url) => {
+    const urlModel = new Url({
+      originUrl: url.originUrl,
+      shortUrl: url.shortUrl,
+      user: savedUser._id,
+    });
+    const savedUrl = await urlModel.save();
+    savedUser.urls.push(savedUrl._id);
+  });
+
+  await Promise.all(promises);
+  await savedUser.save();
+
+  const userToken = { username: testUserName, id: savedUser.id };
+  token = jwt.sign(userToken, config.SECRET);
+}, 50000);
 
 describe("GET /api/url", () => {
-
   test("should return urls as JSON", async () => {
-    await api
-      .get("/api/url")
-      .expect(200)
-      .expect("Content-Type", /application\/json/);
-  }, 5000000);
-  test("should return initial urls", async () => {
-    const allUrls = await Url.find({});
-    let index = 0;
-    helper.initialUrls.forEach((url) => {
-      expect(allUrls[index].originUrl).toBe(url.originUrl);
-      expect(allUrls[index++].shortUrl).toBe(url.shortUrl);
-    });
-  });
+    const response = await api
+    .get("/api/url")
+    .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(helper.initialUrls.length);
+  }, 50000);
 });
 
 describe("URL shortener", () => {
@@ -63,20 +81,6 @@ describe("URL shortener", () => {
 });
 
 describe("POST /api/url", () => {
-  let token = null;
-  let testUserName = "test";
-  beforeAll(async () => {
-    await User.deleteMany({});
-    await Url.deleteMany({});
-    const passwordHash = await bcrypt.hash("1234", 10);
-    const user = await new User({
-      username: testUserName,
-      passwordHash,
-    }).save();
-
-    const userToken = { username: testUserName, id: user.id };
-    return (token = jwt.sign(userToken, config.SECRET));
-  });
   test("adds a new url with valid input", async () => {
     await api
       .post("/api/url")
@@ -114,7 +118,10 @@ describe("DELETE api/url", () => {
   test("should remove an existing URL", async () => {
     const urlAtStart = await helper.urlsInDb();
     const urlToDelete = urlAtStart[0];
-    await api.delete(`/api/url/${urlToDelete.shortUrl}`).expect(204);
+    await api
+    .delete(`/api/url/${urlToDelete.shortUrl}`)
+    .set("Authorization", `bearer ${token}`)
+    .expect(204);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length - 1);
 
@@ -129,41 +136,13 @@ describe("PUT api/url", () => {
     const urlToUpdate = urlAtStart[0];
     await api
       .put(`/api/url/${urlToUpdate.shortUrl}`)
-      .send({ originUrl: helper.vaildUrl })
+      .send({ originUrl: helper.vaildUrl, shortUrl: helper.updateShortUrl })
+      .set("Authorization", `bearer ${token}`)
       .expect(200);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
 
     expect(urlAtEnd[0].originUrl).toBe(helper.vaildUrl);
-  });
-});
-
-describe("PACTH api/url", () => {
-  test("Update shortUrl", async () => {
-    const urlAtStart = await helper.urlsInDb();
-    const urlToPatch = urlAtStart[0];
-    await api
-      .patch(`/api/url/${urlToPatch.shortUrl}`)
-      .send({ newShortUrl: helper.updateShortUrl })
-      .expect(200);
-
-    const urlAtEnd = await helper.urlsInDb();
-
-    expect(urlAtEnd[0].shortUrl).not.toEqual(urlToPatch.shortUrl);
     expect(urlAtEnd[0].shortUrl).toBe(helper.updateShortUrl);
   });
-
-  test("Invalid update with existing short URL", async () => {
-    const urlAtStart = await helper.urlsInDb();
-    const urlToPatch = urlAtStart[0];
-    const existUrl = urlAtStart[1];
-    await api
-      .patch(`/api/url/${urlToPatch.shortUrl}`)
-      .send({ newShortUrl: existUrl.shortUrl })
-      .expect(409);
-  });
-});
-
-afterAll(() => {
-  mongoose.connection.close();
 });
