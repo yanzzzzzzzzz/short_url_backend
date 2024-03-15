@@ -1,12 +1,11 @@
-const UrlRouter = require("express").Router();
-const Url = require("../models/url");
-const User = require("../models/user");
+const UrlRouter = require('express').Router();
+const Url = require('../models/url');
+const User = require('../models/user');
 
-const characters =
-  "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 function generateRandomString() {
-  let result = "";
+  let result = '';
   for (let i = 0; i < 6; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
@@ -31,12 +30,12 @@ function isValidUrl(string) {
   return true;
 }
 
-UrlRouter.post("/", async (req, res) => {
+UrlRouter.post('/', async (req, res) => {
   const body = req.body;
   const url = body.url;
   const user = req.user;
   if (!isValidUrl(url)) {
-    res.status(400).json({ error: "url is invalid" }).end();
+    res.status(400).json({ error: 'url is invalid' }).end();
   } else {
     let randomString = await generateUniqueRandomString();
 
@@ -44,7 +43,7 @@ UrlRouter.post("/", async (req, res) => {
     const urlModel = new Url({
       originUrl: url,
       shortUrl: shortUrl,
-      user: user?._id,
+      user: user?._id
     });
     const savedUrl = await urlModel.save();
     if (savedUrl != null && user != null) {
@@ -56,7 +55,7 @@ UrlRouter.post("/", async (req, res) => {
   }
 });
 
-UrlRouter.get("/:shortUrl", async (req, res) => {
+UrlRouter.get('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const url = await Url.findOne({ shortUrl });
   if (url) {
@@ -66,23 +65,27 @@ UrlRouter.get("/:shortUrl", async (req, res) => {
   }
 });
 
-UrlRouter.get("/", async (req, res) => {
+UrlRouter.get('/', async (req, res) => {
   const user = req.user;
-  if(user == null){
-    return res.json([])
+  if (user == null) {
+    return res.json([]);
   }
-  const urlList = await User.findOne({ username: user.username })
-  .populate("urls", "originUrl shortUrl");
+  const urlList = await User.findOne({ username: user.username }).populate(
+    'urls',
+    'originUrl shortUrl'
+  );
   return res.json(urlList.urls);
 });
 
-UrlRouter.delete("/:shortUrl", async (req, res) => {
+UrlRouter.delete('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const url = await Url.findOne({ shortUrl: shortUrl });
   if (url) {
-    if(req.user._id.toString() !== url.user._id.toString()){
-      res.status(403).json({ error: "Unauthorized: Cannot delete URL created by another user" })
-      .end();
+    if (req.user._id.toString() !== url.user._id.toString()) {
+      res
+        .status(403)
+        .json({ error: 'Unauthorized: Cannot delete URL created by another user' })
+        .end();
     }
     await Url.findByIdAndDelete(url._id);
     res.status(204).end();
@@ -91,18 +94,20 @@ UrlRouter.delete("/:shortUrl", async (req, res) => {
   }
 });
 
-UrlRouter.put("/:shortUrl", async (req, res) => {
+UrlRouter.put('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const body = req.body;
   const url = await Url.findOne({ shortUrl: shortUrl });
   if (url) {
-    if(req.user._id.toString() !== url.user._id.toString()){
-      res.status(403).json({ error: "Unauthorized: Cannot modify URL created by another user" })
-      .end();
+    if (req.user._id.toString() !== url.user._id.toString()) {
+      res
+        .status(403)
+        .json({ error: 'Unauthorized: Cannot modify URL created by another user' })
+        .end();
     }
     await Url.findByIdAndUpdate(url._id, {
       originUrl: body.originUrl,
-      shortUrl: body.shortUrl,
+      shortUrl: body.shortUrl
     });
     res.status(200).end();
   } else {
@@ -110,7 +115,7 @@ UrlRouter.put("/:shortUrl", async (req, res) => {
   }
 });
 
-UrlRouter.patch("/:shortUrl", async (req, res) => {
+UrlRouter.patch('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const { newShortUrl } = req.body;
   const url = await Url.findOne({ shortUrl: shortUrl });

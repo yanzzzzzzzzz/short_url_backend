@@ -1,18 +1,18 @@
-const Url = require("../models/url");
-const User = require("../models/user");
+const Url = require('../models/url');
+const User = require('../models/user');
 const initialUrls = [
   {
-    originUrl: "https://disp.cc/b/",
-    shortUrl: "AAAAAA",
+    originUrl: 'https://disp.cc/b/',
+    shortUrl: 'AAAAAA'
   },
   {
-    originUrl: "https://github.com/yanzzzzzzzzz",
-    shortUrl: "yanzzzzzzzzz",
-  },
+    originUrl: 'https://github.com/yanzzzzzzzzz',
+    shortUrl: 'yanzzzzzzzzz'
+  }
 ];
-const vaildUrl = "https://www.google.com.tw/";
-const invaildUrl = "asd.tw";
-const updateShortUrl = "ABCDEFG";
+const vaildUrl = 'https://www.google.com.tw/';
+const invaildUrl = 'asd.tw';
+const updateShortUrl = 'ABCDEFG';
 const urlsInDb = async () => {
   const urls = await Url.find({});
   return urls.map((url) => url.toJSON());
@@ -25,20 +25,20 @@ const usersInDb = async () => {
 
 const initialUsers = [
   {
-    username: "mluukkai",
-    name: "Matti Luukkainen",
-    password: "salainen",
+    username: 'mluukkai',
+    name: 'Matti Luukkainen',
+    password: 'salainen'
   },
   {
-    username: "root",
-    name: "root123",
-    password: "1234",
+    username: 'root',
+    name: 'root123',
+    password: '1234'
   },
   {
-    username: "ggallin",
-    name: "ggallin",
-    password: "ggallin1234",
-  },
+    username: 'ggallin',
+    name: 'ggallin',
+    password: 'ggallin1234'
+  }
 ];
 module.exports = {
   initialUrls,
@@ -47,5 +47,5 @@ module.exports = {
   updateShortUrl,
   initialUsers,
   urlsInDb,
-  usersInDb,
+  usersInDb
 };
