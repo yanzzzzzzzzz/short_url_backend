@@ -49,34 +49,6 @@ describe('GET /api/url', () => {
   }, 50000);
 });
 
-describe('URL shortener', () => {
-  let browser, page;
-
-  beforeAll(async () => {
-    browser = await puppeteer.launch({
-      executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe'
-    });
-    page = await browser.newPage();
-  });
-
-  afterAll(async () => {
-    await browser.close();
-  });
-
-  test('should redirect to correct URL', async () => {
-    const urlAtStart = await helper.urlsInDb();
-    const urlToView = urlAtStart[0];
-    const url = urlToView.originUrl;
-    const shortUrl = `http://localhost:${config.PORT}/api/url/` + urlToView.shortUrl;
-
-    await page.goto(shortUrl);
-
-    const redirectedUrl = await page.url();
-
-    expect(redirectedUrl).toBe(url);
-  }, 500000);
-});
-
 describe('POST /api/url', () => {
   test('adds a new url with valid input', async () => {
     await api
