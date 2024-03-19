@@ -4,7 +4,6 @@ const app = require('../app');
 const Url = require('../models/url');
 const api = supertest(app);
 const helper = require('./test_helper');
-const puppeteer = require('puppeteer');
 const config = require('../utils/config');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
