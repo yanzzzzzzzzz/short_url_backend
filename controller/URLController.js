@@ -31,28 +31,27 @@ function isValidUrl(string) {
 }
 
 UrlRouter.post('/', async (req, res) => {
-  const body = req.body;
-  const url = body.url;
+  const originUrl = req.body.url;
   const user = req.user;
-  if (!isValidUrl(url)) {
+  if (!isValidUrl(originUrl)) {
     res.status(400).json({ error: 'url is invalid' }).end();
-  } else {
-    let randomString = await generateUniqueRandomString();
-
-    const shortUrl = `${randomString}`;
-    const urlModel = new Url({
-      originUrl: url,
-      shortUrl: shortUrl,
-      user: user?._id
-    });
-    const savedUrl = await urlModel.save();
-    if (savedUrl != null && user != null) {
-      user.urls = user.urls.concat(savedUrl._id);
-      await user.save();
-    }
-
-    res.status(201).json(savedUrl);
+    return;
   }
+
+  const shortUrl = await generateUniqueRandomString();
+
+  const urlModel = new Url({
+    originUrl,
+    shortUrl,
+    user: user?._id
+  });
+  const savedUrl = await urlModel.save();
+  if (savedUrl != null && user != null) {
+    user.urls = user.urls.concat(savedUrl._id);
+    await user.save();
+  }
+
+  res.status(201).json({ originUrl, shortUrl });
 });
 
 UrlRouter.get('/:shortUrl', async (req, res) => {
