@@ -33,7 +33,7 @@ function isValidUrl(string) {
 UrlRouter.post('/', async (req, res) => {
   const originUrl = req.body.url;
   const user = req.user;
-  if (!isValidUrl(originUrl)) {
+  if (originUrl === undefined || !isValidUrl(originUrl)) {
     res.status(400).json({ error: 'url is invalid' }).end();
     return;
   }
