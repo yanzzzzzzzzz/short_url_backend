@@ -73,7 +73,11 @@ UrlRouter.get('/', async (req, res) => {
     'urls',
     'originUrl shortUrl'
   );
-  return res.json(urlList.urls);
+  const sanitizedUrlList = urlList.urls.map((url) => ({
+    originUrl: url.originUrl,
+    shortUrl: url.shortUrl
+  }));
+  return res.json(sanitizedUrlList);
 });
 
 UrlRouter.delete('/:shortUrl', async (req, res) => {
