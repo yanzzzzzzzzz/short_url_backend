@@ -60,7 +60,7 @@ UrlRouter.get('/:shortUrl', async (req, res) => {
   if (url) {
     res.redirect(url.originUrl);
   } else {
-    res.status(404).end();
+    res.status(400).end();
   }
 });
 
