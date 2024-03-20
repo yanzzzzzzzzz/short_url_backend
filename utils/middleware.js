@@ -3,18 +3,18 @@ const config = require('./config');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 
-const requestLogger = (request, response, next) => {
+const requestLogger = (request, _response, next) => {
   logger.info('Method:', request.method);
   logger.info('Method:', request.path);
   logger.info('Method:', request.body);
   logger.info('----');
   next();
 };
-const unknownEndpoint = (request, response) => {
+const unknownEndpoint = (_request, response) => {
   response.status(404).send({ error: 'unknown endpoint' });
 };
 
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, _request, response, next) => {
   logger.error(error.message);
   if (error.name === 'CastError') {
     return response.status(400).send({
@@ -35,7 +35,7 @@ const errorHandler = (error, request, response, next) => {
   }
   next(error);
 };
-const userExtractor = async (request, response, next) => {
+const userExtractor = async (request, _response, next) => {
   const token = request.token;
   if (token) {
     const decodedToken = jwt.verify(token, config.SECRET);
@@ -43,7 +43,7 @@ const userExtractor = async (request, response, next) => {
   }
   next();
 };
-const tokenExtractor = (request, response, next) => {
+const tokenExtractor = (request, _response, next) => {
   const authorization = request.get('authorization');
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
     request.token = authorization.substring(7);
