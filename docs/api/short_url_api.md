@@ -109,16 +109,24 @@ sequenceDiagram
 sequenceDiagram
     participant client
     participant server
+    participant redis
     participant db
     
     autonumber 1
     client ->> server: [GET] /api/url/{shortUrl}
-    server ->> db: 取出短網址對應的原始網址
+    server ->> redis: 取出短網址對應的原始網址
     alt
-        Note over server, db: 資料存在
+        Note over server, redis: 資料存在
         server ->> client: reponse 302: Found.
     else
-        Note over server, db: 資料不存在
-        server ->> client: reponse 400: Bad Request.
+        server ->> db: 取出短網址對應的原始網址
+        alt
+            Note over server, db: 資料存在
+            server ->> redis: 寫入短網址資料<br>key:{shortUrl}, value:{originalUrl}
+            server ->> client: reponse 302: Found.
+        else 
+            Note over server, db: 資料不存在
+            server ->> client: reponse 400: Bad Request.
+        end
     end
 ```
