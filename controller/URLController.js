@@ -4,6 +4,12 @@ const User = require('../models/user');
 
 const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+const redis = require('redis');
+const createClient = redis.createClient;
+const redisClient = createClient();
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.connect();
+
 function generateRandomString() {
   let result = '';
   for (let i = 0; i < 6; i++) {
@@ -46,6 +52,7 @@ UrlRouter.post('/', async (req, res) => {
     user: user?._id
   });
   const savedUrl = await urlModel.save();
+  await redisClient.set(shortUrl, originUrl, 'EX', 60 * 60);
   if (savedUrl != null && user != null) {
     user.urls = user.urls.concat(savedUrl._id);
     await user.save();
@@ -56,9 +63,14 @@ UrlRouter.post('/', async (req, res) => {
 
 UrlRouter.get('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
+  const originalUrlOnRedis = await redisClient.get(shortUrl);
+  if (originalUrlOnRedis !== null) {
+    return res.redirect(originalUrlOnRedis);
+  }
   const url = await Url.findOne({ shortUrl });
   if (url) {
-    res.redirect(url.originUrl);
+    redisClient.set(url.shortUrl, url.originUrl, 'EX', 60 * 60);
+    return res.redirect(url.originUrl);
   } else {
     res.status(400).end();
   }
