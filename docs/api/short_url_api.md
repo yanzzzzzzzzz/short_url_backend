@@ -13,6 +13,7 @@ Request Body
 | Field  | Type   | Required | Description |
 | ------ | ------ | :------: | ----------- |
 | url    | string | Yes      | 原始網址 |
+| customShortUrl    | string | No      | 自定義短網址 |
 
 ### Response
 
@@ -39,6 +40,22 @@ sequenceDiagram
     else
         autonumber 2
         Note over server: URL is valid.
+        Note over server: 檢查input存在自訂義短網址
+        alt 
+            Note over server: input 存在自訂義短網址
+            server ->> db: 檢查是否有跟database重複
+            alt
+                Note over server, db: 跟database重複
+                server ->>client: client: reponse 400: Duplicate short URL exists.
+            else 
+                Note over server, db: 跟database不重複, 使用自訂義短網址
+            end
+        else
+        autonumber 2
+            Note over server: input 不存在自訂義短網址
+            server ->> server: 產生不跟database重複的短網址
+        end
+
         server ->> redis: Write the data to Redis.<br>key:{shortUrl}, value:{originalUrl}<br>Set an expiration time: 1hr.
         server ->> db: Write the data to database.<br>table:urls, users.
         alt 
