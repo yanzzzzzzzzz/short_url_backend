@@ -27,24 +27,24 @@ Request Body
 sequenceDiagram
     participant client
     participant server
+    participant redis
     participant db
     
     autonumber 1
     client ->> server: [POST] /api/url
-    Note over server: check input url is valid
+    Note over server: Check if the input URL is valid.
     alt
-        Note over server: url is invalid
-        server ->> client: reponse 400: url is invalid.
+        Note over server: URL is invalid.
+        server ->> client: reponse 400: URL is invalid.
     else
         autonumber 2
-        Note over server: url is valid
-
+        Note over server: URL is valid.
+        server ->> redis: Write the data to Redis.<br>key:{shortUrl}, value:{originalUrl}<br>Set an expiration time: 1hr.
+        server ->> db: Write the data to database.<br>table:urls, users.
         alt 
-            Note over server, db: 用戶已登入，並帶有效的JWT token
-            server ->> db: 寫入短網址<br>table:urls, users
+            Note over server, db: User is already logged in with a valid JWT token.
+                    server ->> db: Write the data to database.<br>table:users.
         else
-        Note over server, db: 用戶未登入
-            server ->> db: 寫入短網址<br>table:urls
         end
         
         server ->> client: reponse 200: OK
@@ -82,13 +82,12 @@ sequenceDiagram
     client ->> server: [GET] /api/url
     
     alt
-        Note over client, server: 用戶未登入，回傳空陣列
+        Note over client, server: User not logged in.<br>returning an empty array.
         server ->> client: reponse 200: OK.
     else
-        Note over server, db: 用戶登入，讀取用戶已建立url
-        server ->> db: 查詢url資料表
-        db ->> server: 回傳url資料
-        Note over client, server: 回傳結果
+        Note over server, db: User logged in.
+        server ->> db: Querying the URL data table.
+        db ->> server: Return URL data.
         server ->> client: reponse 200: OK
     end
 ```
@@ -114,18 +113,19 @@ sequenceDiagram
     
     autonumber 1
     client ->> server: [GET] /api/url/{shortUrl}
-    server ->> redis: 取出短網址對應的原始網址
+    server ->> redis: Retrieve the short URL corresponding to the original URL.
     alt
-        Note over server, redis: 資料存在
+        Note over server, redis: Data exists on redis.
         server ->> client: reponse 302: Found.
     else
-        server ->> db: 取出短網址對應的原始網址
+        Note over server, redis: Data does not exist in Redis.
+        server ->> db: Retrieve the short URL corresponding to the original URL.
         alt
-            Note over server, db: 資料存在
-            server ->> redis: 寫入短網址資料<br>key:{shortUrl}, value:{originalUrl}
+            Note over server, db: Data exists on database.
+            server ->> redis: Write the data to Redis.<br>key:{shortUrl}, value:{originalUrl}<br>Set an expiration time: 1hr.
             server ->> client: reponse 302: Found.
         else 
-            Note over server, db: 資料不存在
+            Note over server, db: Data does not exist in the database.
             server ->> client: reponse 400: Bad Request.
         end
     end
