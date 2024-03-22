@@ -80,6 +80,16 @@ describe('POST /api/url', () => {
     const allUrls = await Url.find({});
     expect(allUrls).toHaveLength(helper.initialUrls.length + 1);
   });
+
+  test('add a new url with duplicate short url should return error', async () => {
+    const allUrls = await Url.find({});
+    await api
+      .post('/api/url')
+      .set('Authorization', `bearer ${token}`)
+      .send({ url: allUrls[0].originUrl, customShortUrl: allUrls[0].shortUrl })
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+  });
 });
 
 describe('DELETE api/url', () => {
