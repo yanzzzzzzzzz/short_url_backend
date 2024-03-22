@@ -43,8 +43,17 @@ UrlRouter.post('/', async (req, res) => {
     res.status(400).json({ error: 'url is invalid' }).end();
     return;
   }
-
-  const shortUrl = await generateUniqueRandomString();
+  const customShortUrl = req.body.customShortUrl;
+  let shortUrl;
+  if (customShortUrl === undefined) {
+    shortUrl = await generateUniqueRandomString();
+  } else {
+    shortUrl = customShortUrl;
+    let existingUrl = await Url.findOne({ shortUrl });
+    if (existingUrl !== null) {
+      return res.status(400).json({ error: 'Duplicate short URL exists.' }).end();
+    }
+  }
 
   const urlModel = new Url({
     originUrl,
