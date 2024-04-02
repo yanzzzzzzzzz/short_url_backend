@@ -57,7 +57,7 @@ sequenceDiagram
         end
 
         server ->> redis: Write the data to Redis.<br>key:{shortUrl}, value:{originalUrl}<br>Set an expiration time: 1hr.
-        server ->> db: Write the data to database.<br>table:urls, users.
+        server ->> db: Write the data to database.<br>table:urls
         alt 
             Note over server, db: User is already logged in with a valid JWT token.
                     server ->> db: Write the data to database.<br>table:users.
