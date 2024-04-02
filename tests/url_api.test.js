@@ -90,6 +90,20 @@ describe('POST /api/url', () => {
       .expect(400)
       .expect('Content-Type', /application\/json/);
   });
+
+  test('add a new url with custom short url should return ok', async () => {
+    const customShortUrl = '213qweasd';
+    await api
+      .post('/api/url')
+      .set('Authorization', `bearer ${token}`)
+      .send({ url: helper.vaildUrl, customShortUrl })
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+
+    const myCreatedUrl = await Url.findOne({ shortUrl: customShortUrl });
+    expect(myCreatedUrl).not.toBeNull();
+    expect(myCreatedUrl.shortUrl).toEqual(customShortUrl);
+  });
 });
 
 describe('DELETE api/url', () => {
