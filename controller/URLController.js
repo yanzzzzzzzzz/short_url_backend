@@ -45,7 +45,7 @@ UrlRouter.post('/', async (req, res) => {
   }
   const customShortUrl = req.body.customShortUrl;
   let shortUrl;
-  if (customShortUrl === undefined) {
+  if (customShortUrl === undefined || customShortUrl === '') {
     shortUrl = await generateUniqueRandomString();
   } else {
     shortUrl = customShortUrl;
