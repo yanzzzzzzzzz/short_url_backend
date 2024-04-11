@@ -1,6 +1,8 @@
 const UrlRouter = require('express').Router();
 const Url = require('../models/url');
 const User = require('../models/user');
+const fetch = require('node-fetch');
+const cheerio = require('cheerio');
 
 const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -25,6 +27,20 @@ async function generateUniqueRandomString() {
     existingUrl = await Url.findOne({ shortUrl: randomString });
   }
   return randomString;
+}
+async function getUrlInformation(url) {
+  try {
+    const response = await fetch(url);
+    const htmlContent = await response.text();
+    const $ = cheerio.load(htmlContent);
+    const title = $('title').text();
+    const description = $('meta[name="description"]').attr('content');
+    const previewImage = $('meta[property="og:image"]').attr('content');
+
+    return { title, description, previewImage };
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function isValidUrl(string) {
@@ -55,7 +71,13 @@ UrlRouter.post('/', async (req, res) => {
     }
   }
 
+  const urlInfo = await getUrlInformation(originUrl);
+  console.log('urlInfo', urlInfo);
+  const datenow = new Date();
   const urlModel = new Url({
+    createTime: datenow.toISOString().replace('T', ' ').substring(0, 19),
+    title: urlInfo.title,
+    prevewImage: urlInfo.previewImage,
     originUrl,
     shortUrl,
     user: user?._id
