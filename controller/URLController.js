@@ -79,10 +79,9 @@ UrlRouter.post('/', async (req, res) => {
     title: urlInfo.title,
     previewImage: urlInfo.previewImage,
     originUrl,
-    shortUrl,
-    user: user?._id
+    shortUrl
   };
-  const urlModel = new Url(urlObj);
+  const urlModel = new Url({ ...urlObj, user: user?._id });
   const savedUrl = await urlModel.save();
   await redisClient.set(shortUrl, originUrl, 'EX', 60 * 60);
   if (savedUrl != null && user != null) {
