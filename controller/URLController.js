@@ -74,14 +74,15 @@ UrlRouter.post('/', async (req, res) => {
   const urlInfo = await getUrlInformation(originUrl);
   console.log('urlInfo', urlInfo);
   const datenow = new Date();
-  const urlModel = new Url({
+  const urlObj = {
     createTime: datenow.toISOString().replace('T', ' ').substring(0, 19),
     title: urlInfo.title,
-    prevewImage: urlInfo.previewImage,
+    previewImage: urlInfo.previewImage,
     originUrl,
     shortUrl,
     user: user?._id
-  });
+  };
+  const urlModel = new Url(urlObj);
   const savedUrl = await urlModel.save();
   await redisClient.set(shortUrl, originUrl, 'EX', 60 * 60);
   if (savedUrl != null && user != null) {
@@ -89,7 +90,7 @@ UrlRouter.post('/', async (req, res) => {
     await user.save();
   }
 
-  res.status(201).json({ originUrl, shortUrl });
+  res.status(201).json(urlObj);
 });
 
 UrlRouter.get('/:shortUrl', async (req, res) => {
@@ -114,11 +115,15 @@ UrlRouter.get('/', async (req, res) => {
   }
   const urlList = await User.findOne({ username: user.username }).populate(
     'urls',
-    'originUrl shortUrl'
+    'originUrl shortUrl createTime previewImage title'
   );
+  console.log('urlList', urlList);
   const sanitizedUrlList = urlList.urls.map((url) => ({
     originUrl: url.originUrl,
-    shortUrl: url.shortUrl
+    shortUrl: url.shortUrl,
+    createTime: url.createTime,
+    previewImage: url.previewImage,
+    title: url.title
   }));
   return res.json(sanitizedUrlList);
 });

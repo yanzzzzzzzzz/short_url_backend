@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const urlSchema = new mongoose.Schema({
   createTime: String,
   title: String,
-  prevewImage: String,
+  previewImage: String,
   originUrl: String,
   shortUrl: String,
   user: {
