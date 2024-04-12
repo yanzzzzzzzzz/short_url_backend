@@ -7,20 +7,21 @@ const app = require('../app');
 const api = supertest(app);
 
 let testUser;
-beforeEach(async () => {
-  await User.deleteMany({});
-  await Url.deleteMany({});
-  testUser = helper.initialUsers[0];
-  const passwordHash = await bcrypt.hash(testUser.password, 10);
-  const user = new User({
-    username: testUser.username,
-    name: testUser.name,
-    passwordHash
-  });
-  await user.save();
-}, 50000);
 
 describe('login api', () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+    await Url.deleteMany({});
+    testUser = helper.initialUsers[0];
+    const passwordHash = await bcrypt.hash(testUser.password, 10);
+    const user = new User({
+      username: testUser.username,
+      name: testUser.name,
+      passwordHash
+    });
+    await user.save();
+  }, 50000);
+
   test('correct password return login success', async () => {
     await api
       .post('/api/login')
