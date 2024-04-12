@@ -21,6 +21,9 @@ Request Body
 | ------- | ------ | ----------- |
 | originUrl  | string | 原始網址 |
 | shortUrl    | string | 短網址 |
+| createTime    | string | 建立時間 |
+| title    | string | 原始網址標題 |
+| previewImage | string | 預覽圖片 |
 
 ### Flow
 
@@ -56,6 +59,7 @@ sequenceDiagram
             server ->> server: 產生不跟database重複的短網址
         end
 
+        Note over server: 獲取網頁內容，取出web title、preview image、description
         server ->> redis: Write the data to Redis.<br>key:{shortUrl}, value:{originalUrl}<br>Set an expiration time: 1hr.
         server ->> db: Write the data to database.<br>table:urls
         alt 
@@ -86,6 +90,9 @@ sequenceDiagram
 | ------- | ------ | ----------- |
 | originUrl  | string | 原始網址 |
 | shortUrl    | string | 短網址 |
+| createTime    | string | 建立時間 |
+| title    | string | 原始網址標題 |
+| previewImage | string | 預覽圖片 |
 
 ### Flow
 
