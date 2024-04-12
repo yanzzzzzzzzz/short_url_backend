@@ -34,11 +34,6 @@ Start the server:
 npm run dev
 ```
 
-## RESTful API for URL Shortening Service
+## API
 
-* GET /urls: Fetches all URLs in the collection.
-* GET /urls/:shortUrl: Fetches a single URL by its shortUrl identifier.
-* POST /urls: Creates a new URL resource based on the request data.
-* DELETE /urls/:shortUrl: Removes the identified URL by its shortUrl identifier.
-* PUT /urls/:shortUrl: Replaces the entire identified URL with the request data.
-* PATCH /urls/:shortUrl: Updates a subset of properties of the identified URL with the request data.
+[see doc](/docs/api/short_url_api.md)
