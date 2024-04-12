@@ -8,17 +8,19 @@ The Short URL Backend is a service that provides URL shortening functionality to
 
 To get started with the Short URL Backend, you need to perform the following steps:
 
-Clone the repository:
+### Clone the repository
 
 ```bash
 git clone https://github.com/yanzzzzzzzzz/short_url_backend.git
 ```
 
-Install dependencies:
+### Install dependencies
 
 ```bash
 npm install
 ```
+
+### Create env file
 
 Create a `.env` file with the following information:
 
@@ -28,7 +30,11 @@ MONGODB_URI=<your_mongodb_uri>
 SECRET = <secret_string_use_by_jwt_token>
 ```
 
-Start the server:
+### Redis
+
+[Download and open redis server](https://github.com/tporadowski/redis/releases)
+
+### Start the server
 
 ```bash
 npm run dev
