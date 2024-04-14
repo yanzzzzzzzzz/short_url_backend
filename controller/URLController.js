@@ -5,12 +5,7 @@ const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
 const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-const redis = require('redis');
-const createClient = redis.createClient;
-const redisClient = createClient();
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
-redisClient.connect();
+const redisClient = require('../Service/redisService');
 
 function generateRandomString() {
   let result = '';
@@ -72,7 +67,6 @@ UrlRouter.post('/', async (req, res) => {
   }
 
   const urlInfo = await getUrlInformation(originUrl);
-  console.log('urlInfo', urlInfo);
   const datenow = new Date();
   const urlObj = {
     createTime: datenow.toISOString().replace('T', ' ').substring(0, 19),
@@ -95,6 +89,7 @@ UrlRouter.post('/', async (req, res) => {
 UrlRouter.get('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const originalUrlOnRedis = await redisClient.get(shortUrl);
+  console.log('originalUrlOnRedis', originalUrlOnRedis);
   if (originalUrlOnRedis !== null) {
     return res.redirect(originalUrlOnRedis);
   }
@@ -116,7 +111,6 @@ UrlRouter.get('/', async (req, res) => {
     'urls',
     'originUrl shortUrl createTime previewImage title'
   );
-  console.log('urlList', urlList);
   const sanitizedUrlList = urlList.urls.map((url) => ({
     originUrl: url.originUrl,
     shortUrl: url.shortUrl,
