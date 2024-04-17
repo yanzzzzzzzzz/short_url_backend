@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
 const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const redisClient = require('../Service/redisService');
+const redisClient = require('../Service/RedisService');
 
 function generateRandomString() {
   let result = '';
@@ -89,7 +89,6 @@ UrlRouter.post('/', async (req, res) => {
 UrlRouter.get('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const originalUrlOnRedis = await redisClient.get(shortUrl);
-  console.log('originalUrlOnRedis', originalUrlOnRedis);
   if (originalUrlOnRedis !== null) {
     return res.redirect(originalUrlOnRedis);
   }
