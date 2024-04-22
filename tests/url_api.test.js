@@ -172,7 +172,7 @@ describe('PATCH', () => {
     expect(urlAtEnd[0].title).toBe(updateTitle);
   });
 
-  test('update no duplicate short url is okay', async () => {
+  test('just update no duplicate short url is okay', async () => {
     const urlAtStart = await helper.urlsInDb();
     const urlToUpdate = urlAtStart[0];
     await api
@@ -193,5 +193,21 @@ describe('PATCH', () => {
       .send({ newShortUrl: urlAtStart[1].shortUrl })
       .set('Authorization', `bearer ${token}`)
       .expect(409);
+  });
+
+  test('update same short url but different title', async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToUpdate = urlAtStart[0];
+    const updateTitle = 'sadewq';
+    await api
+      .patch(`/api/url/${urlToUpdate.shortUrl}`)
+      .send({ newShortUrl: urlToUpdate.shortUrl, newTitle: updateTitle })
+      .set('Authorization', `bearer ${token}`)
+      .expect(200);
+    const urlAtEnd = await helper.urlsInDb();
+    expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
+
+    expect(urlAtEnd[0].shortUrl).toBe(urlAtStart[0].shortUrl);
+    expect(urlAtEnd[0].title).toBe(updateTitle);
   });
 });

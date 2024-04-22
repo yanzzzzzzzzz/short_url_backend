@@ -168,14 +168,12 @@ UrlRouter.patch('/:shortUrl', async (req, res) => {
   if (!url) {
     return res.status(404).end();
   }
-  if (newShortUrl !== undefined) {
+  if (newShortUrl !== undefined && newShortUrl !== shortUrl) {
     const existingUrl = await Url.findOne({ shortUrl: newShortUrl });
     if (existingUrl) {
       return res.status(409).end();
     }
     url.shortUrl = newShortUrl;
-  } else {
-    url.shortUrl = url.shortUrl;
   }
   if (newTitle !== null) {
     url.title = newTitle;
