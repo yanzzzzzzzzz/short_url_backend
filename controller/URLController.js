@@ -179,7 +179,7 @@ UrlRouter.patch('/:shortUrl', async (req, res) => {
     url.title = newTitle;
   }
   await url.save();
-  return res.status(200).end();
+  return res.status(200).json(url).end();
 });
 
 module.exports = UrlRouter;
