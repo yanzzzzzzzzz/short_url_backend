@@ -138,3 +138,60 @@ describe('PUT api/url', () => {
     expect(urlAtEnd[0].shortUrl).toBe(helper.updateShortUrl);
   });
 });
+
+describe('PATCH', () => {
+  test('update short url and title', async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToUpdate = urlAtStart[0];
+    const updateTitle = 'sadewq';
+    await api
+      .patch(`/api/url/${urlToUpdate.shortUrl}`)
+      .send({ newShortUrl: helper.updateShortUrl, newTitle: updateTitle })
+      .set('Authorization', `bearer ${token}`)
+      .expect(200);
+    const urlAtEnd = await helper.urlsInDb();
+    expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
+
+    expect(urlAtEnd[0].shortUrl).toBe(helper.updateShortUrl);
+    expect(urlAtEnd[0].title).toBe(updateTitle);
+  });
+
+  test('just update title is ok', async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToUpdate = urlAtStart[0];
+    const updateTitle = 'sadewq';
+    await api
+      .patch(`/api/url/${urlToUpdate.shortUrl}`)
+      .send({ newTitle: updateTitle })
+      .set('Authorization', `bearer ${token}`)
+      .expect(200);
+    const urlAtEnd = await helper.urlsInDb();
+    expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
+
+    expect(urlAtEnd[0].shortUrl).toBe(urlAtStart[0].shortUrl);
+    expect(urlAtEnd[0].title).toBe(updateTitle);
+  });
+
+  test('update no duplicate short url is okay', async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToUpdate = urlAtStart[0];
+    await api
+      .patch(`/api/url/${urlToUpdate.shortUrl}`)
+      .send({ newShortUrl: helper.updateShortUrl })
+      .set('Authorization', `bearer ${token}`)
+      .expect(200);
+    const urlAtEnd = await helper.urlsInDb();
+    expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
+    expect(urlAtEnd[0].shortUrl).toBe(helper.updateShortUrl);
+  });
+
+  test('update duplicate short url will failed', async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToUpdate = urlAtStart[0];
+    await api
+      .patch(`/api/url/${urlToUpdate.shortUrl}`)
+      .send({ newShortUrl: urlAtStart[1].shortUrl })
+      .set('Authorization', `bearer ${token}`)
+      .expect(409);
+  });
+});
