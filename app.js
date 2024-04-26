@@ -5,12 +5,16 @@ const app = express();
 const UrlRouter = require('./controller/URLController');
 const usersRouter = require('./controller/UsersController');
 const loginRouter = require('./controller/LoginController');
+const googleAuthRouter = require('./controller/GoogleAuthController');
+const logoutRouter = require('./controller/LogoutController');
 const middleware = require('./utils/middleware');
 const config = require('./utils/config');
 const mongoose = require('mongoose');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
+const cookieParser = require('cookie-parser');
 app.use(cors());
+app.use(cookieParser());
 const swaggerDocument = YAML.load('./swagger.yaml');
 
 mongoose
@@ -27,6 +31,8 @@ app.use(middleware.tokenExtractor);
 app.use('/api/url', middleware.userExtractor, UrlRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter);
+app.use('/api/sessions/oauth/google', googleAuthRouter);
+app.use('/api/logout', logoutRouter);
 app.use(middleware.errorHandler);
 app.use(middleware.unknownEndpoint);
 module.exports = app;
