@@ -5,9 +5,9 @@ const User = require('../models/user');
 const config = require('../utils/config');
 const auth = require('../utils/auth');
 
-googleAuthRouter.get('', async (req, res) => {
+googleAuthRouter.get('/signup', async (req, res) => {
   const code = req.query.code;
-  const { id_token, access_token } = await getGoogleOAuthTokens(code);
+  const { id_token, access_token } = await getGoogleOAuthTokens(code, 'signup');
   const googleUser = await getGoogleUser(id_token, access_token);
 
   if (!googleUser.verified_email) {
@@ -19,14 +19,28 @@ googleAuthRouter.get('', async (req, res) => {
   res.redirect(config.FrontEndUrl);
 });
 
-async function getGoogleOAuthTokens(code) {
+googleAuthRouter.get('/login', async (req, res) => {
+  const code = req.query.code;
+  const { id_token, access_token } = await getGoogleOAuthTokens(code, 'login');
+  const googleUser = await getGoogleUser(id_token, access_token);
+
+  if (!googleUser.verified_email) {
+    return res.status(403).send('Google account is not verified');
+  }
+  const user = await findAndUpdateUser(googleUser);
+
+  auth.setAuthCookies(user, res);
+  res.redirect(config.FrontEndUrl);
+});
+
+async function getGoogleOAuthTokens(code, type) {
   const url = 'https://oauth2.googleapis.com/token';
 
   const values = {
     code,
     client_id: config.GoogleClientId,
     client_secret: config.GoogleClientSecret,
-    redirect_uri: config.GoogleOauthRedirectUrl,
+    redirect_uri: `${config.GoogleOauthRedirectUrl}/${type}`,
     grant_type: 'authorization_code'
   };
 
