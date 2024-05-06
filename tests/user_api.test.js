@@ -13,7 +13,7 @@ describe('POST /api/users', () => {
       const passwordHash = await bcrypt.hash(initialUser.password, 10);
       const user = new User({
         username: initialUser.username,
-        name: initialUser.name,
+        email: initialUser.email,
         passwordHash
       });
       await user.save();
@@ -25,7 +25,7 @@ describe('POST /api/users', () => {
 
     const newUser = {
       username: 'test777',
-      name: 'test777',
+      email: 'test777@yahoo.com.tw',
       password: 'test777'
     };
 
@@ -47,7 +47,7 @@ describe('POST /api/users', () => {
 
     const newUser = {
       username: 'ml',
-      name: 'Matti Luukkainen',
+      email: 'Matti@gadg.com',
       password: 'salainen'
     };
 
@@ -62,7 +62,7 @@ describe('POST /api/users', () => {
 
     const newUser = {
       username: 'ml123',
-      name: 'ml123',
+      email: 'Matti@gadg.com',
       password: ''
     };
 
@@ -72,17 +72,17 @@ describe('POST /api/users', () => {
     expect(usersAtEnd).toHaveLength(usersAtStart.length);
   });
 
-  test('creation invalid user that name is null', async () => {
+  test('creation invalid user that mail is null', async () => {
     const usersAtStart = await helper.usersInDb();
 
     const newUser = {
       username: 'ml123',
-      name: '',
-      password: ''
+      email: '',
+      password: 'ml123'
     };
 
     const result = await api.post('/api/users').send(newUser).expect(400);
-    expect(result.body.error).toContain('password can not be null');
+    expect(result.body.error).toContain('email is invalid');
     const usersAtEnd = await helper.usersInDb();
     expect(usersAtEnd).toHaveLength(usersAtStart.length);
   });
@@ -92,7 +92,7 @@ describe('POST /api/users', () => {
 
     const newUser = {
       username: 'root',
-      name: 'root',
+      email: 'root@weq',
       password: 'root123'
     };
     const result = await api
@@ -115,7 +115,7 @@ describe('GET /api/users', () => {
       const passwordHash = await bcrypt.hash(initialUser.password, 10);
       const user = new User({
         username: initialUser.username,
-        name: initialUser.name,
+        email: initialUser.email,
         passwordHash
       });
       await user.save();

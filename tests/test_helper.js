@@ -26,17 +26,17 @@ const usersInDb = async () => {
 const initialUsers = [
   {
     username: 'mluukkai',
-    name: 'Matti Luukkainen',
+    email: 'mluukkai@example.com',
     password: 'salainen'
   },
   {
     username: 'root',
-    name: 'root123',
+    email: 'root@example.com',
     password: '1234'
   },
   {
     username: 'ggallin',
-    name: 'ggallin',
+    email: 'gg@example.com',
     password: 'ggallin1234'
   }
 ];

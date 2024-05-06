@@ -16,7 +16,7 @@ describe('login api', () => {
     const passwordHash = await bcrypt.hash(testUser.password, 10);
     const user = new User({
       username: testUser.username,
-      name: testUser.name,
+      email: testUser.email,
       passwordHash
     });
     await user.save();
@@ -25,14 +25,14 @@ describe('login api', () => {
   test('correct password return login success', async () => {
     await api
       .post('/api/login')
-      .send({ username: testUser.username, password: testUser.password })
+      .send({ email: testUser.email, password: testUser.password })
       .expect(200);
   }, 50000);
 
   test('error password return login failed', async () => {
     await api
       .post('/api/login')
-      .send({ username: testUser.username, password: `${testUser.password}123` })
+      .send({ email: testUser.email, password: `${testUser.password}123` })
       .expect(401);
   }, 50000);
 });
