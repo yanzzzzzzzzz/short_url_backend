@@ -124,15 +124,17 @@ UrlRouter.delete('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const url = await Url.findOne({ shortUrl: shortUrl });
   if (url) {
-    if (req.user._id.toString() !== url.user._id.toString()) {
+    if (url.user != null && req.user._id.toString() !== url.user._id.toString()) {
       res
         .status(403)
         .json({ error: 'Unauthorized: Cannot delete URL created by another user' })
         .end();
     }
-    await User.findByIdAndUpdate(req.user._id, {
-      $pull: { urls: url._id }
-    });
+    if (req.user) {
+      await User.findByIdAndUpdate(req.user._id, {
+        $pull: { urls: url._id }
+      });
+    }
     await Url.findByIdAndDelete(url._id);
     res.status(204).end();
   } else {
