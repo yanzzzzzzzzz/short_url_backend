@@ -48,7 +48,6 @@ const tokenExtractor = (request, _response, next) => {
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
     request.token = authorization.substring(7);
   } else {
-    console.log('customToken', request.cookies?.customToken);
     request.token = request.cookies?.customToken;
   }
   next();
