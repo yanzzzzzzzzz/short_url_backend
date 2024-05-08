@@ -10,9 +10,9 @@ usersRouter.post('/', async (req, res) => {
   if (!password || password.length == 0) {
     return res.status(400).json({ error: 'password can not be null' });
   }
-  const existingUser = await User.findOne({ username });
+  const existingUser = await User.findOne({ email: email });
   if (existingUser) {
-    return res.status(400).json({ error: 'username must be unique' });
+    return res.status(400).json({ error: 'This email is already registered' });
   }
   if (!isValidEmail(email)) {
     return res.status(400).json({ error: 'email is invalid' });

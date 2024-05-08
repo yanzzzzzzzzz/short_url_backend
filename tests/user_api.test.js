@@ -87,12 +87,12 @@ describe('POST /api/users', () => {
     expect(usersAtEnd).toHaveLength(usersAtStart.length);
   });
 
-  test('creation fails with proper statuscode and message if username already taken', async () => {
+  test('creation fails with proper statuscode and message if email already exist', async () => {
     const usersAtStart = await helper.usersInDb();
 
     const newUser = {
       username: 'root',
-      email: 'root@weq',
+      email: usersAtStart[0].email,
       password: 'root123'
     };
     const result = await api
@@ -101,7 +101,7 @@ describe('POST /api/users', () => {
       .expect(400)
       .expect('Content-Type', /application\/json/);
 
-    expect(result.body.error).toContain('username must be unique');
+    expect(result.body.error).toContain('This email is already registered');
 
     const usersAtEnd = await helper.usersInDb();
     expect(usersAtEnd).toEqual(usersAtStart);
