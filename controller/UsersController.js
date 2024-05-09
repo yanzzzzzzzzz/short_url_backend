@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const usersRouter = require('express').Router();
 const User = require('../models/user');
+const auth = require('../utils/auth');
 
 usersRouter.post('/', async (req, res) => {
   const { username, email, password } = req.body;
@@ -28,6 +29,7 @@ usersRouter.post('/', async (req, res) => {
 
   const savedUser = await user.save();
 
+  auth.setAuthCookies(savedUser, res);
   res.status(201).json(savedUser);
 });
 
