@@ -10,19 +10,28 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 let token = null;
-let testUserName = 'test';
-let testUserEmail = 'test@gmail.com';
+let token2 = null;
+let testUser = { username: 'test', email: 'test@gmail.com', password: '1234' };
+let testUser2 = { username: 'test2', email: 'test2@gmail.com', password: '1234' };
 beforeEach(async () => {
   await User.deleteMany({});
   await Url.deleteMany({});
-  const passwordHash = await bcrypt.hash('1234', 10);
+  const passwordHash = await bcrypt.hash(testUser.password, 10);
   const user = new User({
-    username: testUserName,
-    email: testUserEmail,
+    username: testUser.username,
+    email: testUser.email,
     passwordHash
   });
-
   const savedUser = await user.save();
+  token = jwt.sign({ id: savedUser.id }, config.SECRET);
+
+  const user2 = new User({
+    username: testUser2.username,
+    email: testUser2.email,
+    passwordHash
+  });
+  const savedUser2 = await user2.save();
+  token2 = jwt.sign({ id: savedUser2.id }, config.SECRET);
 
   const promises = helper.initialUrls.map(async (url) => {
     const urlModel = new Url({
@@ -36,9 +45,6 @@ beforeEach(async () => {
 
   await Promise.all(promises);
   await savedUser.save();
-
-  const userToken = { id: savedUser.id };
-  token = jwt.sign(userToken, config.SECRET);
 }, 50000);
 
 describe('GET /api/url', () => {
@@ -121,6 +127,16 @@ describe('DELETE api/url', () => {
 
     const existShortUrl = urlAtEnd.map((url) => url.shortUrl);
     expect(existShortUrl).not.toContain(urlToDelete.shortUrl);
+  });
+  test("User can't delete another user create url", async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const urlToDelete = urlAtStart[0];
+    await api
+      .delete(`/api/url/${urlToDelete.shortUrl}`)
+      .set('Authorization', `bearer ${token2}`)
+      .expect(403);
+    const urlAtEnd = await helper.urlsInDb();
+    expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
   });
 });
 
