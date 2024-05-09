@@ -11,12 +11,14 @@ const User = require('../models/user');
 
 let token = null;
 let testUserName = 'test';
+let testUserEmail = 'test@gmail.com';
 beforeEach(async () => {
   await User.deleteMany({});
   await Url.deleteMany({});
   const passwordHash = await bcrypt.hash('1234', 10);
   const user = new User({
     username: testUserName,
+    email: testUserEmail,
     passwordHash
   });
 
@@ -35,7 +37,7 @@ beforeEach(async () => {
   await Promise.all(promises);
   await savedUser.save();
 
-  const userToken = { username: testUserName, id: savedUser.id };
+  const userToken = { id: savedUser.id };
   token = jwt.sign(userToken, config.SECRET);
 }, 50000);
 
