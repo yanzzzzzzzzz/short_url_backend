@@ -106,7 +106,7 @@ UrlRouter.get('/', async (req, res) => {
   if (user == null) {
     return res.json([]);
   }
-  const urlList = await User.findOne({ username: user.username }).populate(
+  const urlList = await User.findOne({ email: user.email }).populate(
     'urls',
     'originUrl shortUrl createTime previewImage title'
   );
@@ -123,9 +123,13 @@ UrlRouter.get('/', async (req, res) => {
 UrlRouter.delete('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const url = await Url.findOne({ shortUrl: shortUrl });
+  console.log('url.user', url.user);
+  console.log('req.user._id', req.user._id);
+  console.log('url.user._id', url.user._id);
+
   if (url) {
     if (url.user != null && req.user._id.toString() !== url.user._id.toString()) {
-      res
+      return res
         .status(403)
         .json({ error: 'Unauthorized: Cannot delete URL created by another user' })
         .end();
