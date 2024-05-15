@@ -106,10 +106,12 @@ UrlRouter.get('/', async (req, res) => {
   if (user == null) {
     return res.json([]);
   }
-  const urlList = await User.findOne({ email: user.email }).populate(
-    'urls',
-    'originUrl shortUrl createTime previewImage title'
-  );
+  const urlList = await User.findOne({ email: user.email }).populate({
+    path: 'urls',
+    select: 'originUrl shortUrl createTime previewImage title',
+    options: { sort: { createTime: -1 } }
+  });
+  console.log('urlList', urlList);
   const sanitizedUrlList = urlList.urls.map((url) => ({
     originUrl: url.originUrl,
     shortUrl: url.shortUrl,
