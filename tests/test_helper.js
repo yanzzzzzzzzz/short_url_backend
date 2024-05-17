@@ -3,11 +3,13 @@ const User = require('../models/user');
 const initialUrls = [
   {
     originUrl: 'https://disp.cc/b/',
-    shortUrl: 'AAAAAA'
+    shortUrl: 'AAAAAA',
+    title: 'this is ptt'
   },
   {
     originUrl: 'https://github.com/yanzzzzzzzzz',
-    shortUrl: 'yanzzzzzzzzz'
+    shortUrl: 'yanzzzzzzzzz',
+    title: 'this is myblog'
   }
 ];
 const vaildUrl = 'https://www.google.com.tw/';

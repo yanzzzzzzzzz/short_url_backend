@@ -36,6 +36,7 @@ beforeEach(async () => {
     const urlModel = new Url({
       originUrl: url.originUrl,
       shortUrl: url.shortUrl,
+      title: url.title,
       user: savedUser._id
     });
     const savedUrl = await urlModel.save();
@@ -52,6 +53,18 @@ describe('GET /api/url', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.length).toBe(helper.initialUrls.length);
+  }, 50000);
+  test('search keyword return right result', async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const keyword = 'myblog';
+    const response = await api
+      .get(`/api/url?searchKeyword=${keyword}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(
+      urlAtStart.filter((u) => u.title.toLowerCase().includes(keyword.toLowerCase())).length
+    );
   }, 50000);
 });
 

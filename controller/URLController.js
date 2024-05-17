@@ -106,12 +106,18 @@ UrlRouter.get('/', async (req, res) => {
   if (user == null) {
     return res.json([]);
   }
+  const searchKeyword = req.query.searchKeyword;
+  let match = {};
+
+  if (searchKeyword) {
+    match = { title: { $regex: searchKeyword } };
+  }
   const urlList = await User.findOne({ email: user.email }).populate({
     path: 'urls',
     select: 'originUrl shortUrl createTime previewImage title',
+    match: match,
     options: { sort: { createTime: -1 } }
   });
-  console.log('urlList', urlList);
   const sanitizedUrlList = urlList.urls.map((url) => ({
     originUrl: url.originUrl,
     shortUrl: url.shortUrl,
@@ -180,7 +186,7 @@ UrlRouter.patch('/:shortUrl', async (req, res) => {
     }
     url.shortUrl = newShortUrl;
   }
-  if (newTitle !== null) {
+  if ((newTitle !== null) | (newTitle !== undefined)) {
     url.title = newTitle;
   }
   await url.save();
