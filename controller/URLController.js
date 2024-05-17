@@ -110,7 +110,7 @@ UrlRouter.get('/', async (req, res) => {
   let match = {};
 
   if (searchKeyword) {
-    match = { title: { $regex: searchKeyword } };
+    match = { title: { $regex: searchKeyword, $options: 'i' } };
   }
   const urlList = await User.findOne({ email: user.email }).populate({
     path: 'urls',
