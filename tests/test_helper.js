@@ -10,6 +10,21 @@ const initialUrls = [
     originUrl: 'https://github.com/yanzzzzzzzzz',
     shortUrl: 'yanzzzzzzzzz',
     title: 'this is myblog'
+  },
+  {
+    originUrl: 'https://www.npmjs.com/package/mongoose-paginate-v2',
+    shortUrl: 'AABB',
+    title: 'mongoose-paginate'
+  },
+  {
+    originUrl: 'https://github.com/yanzzzzzzzzz/short_url_frontend/issues',
+    shortUrl: 'shorturl',
+    title: 'shorturl'
+  },
+  {
+    originUrl: 'https://primevue.org/paginator/',
+    shortUrl: 'paginator',
+    title: 'paginator'
   }
 ];
 const vaildUrl = 'https://www.google.com.tw/';

@@ -106,6 +106,10 @@ UrlRouter.get('/', async (req, res) => {
   if (user == null) {
     return res.json([]);
   }
+  const page = req.query.page ? parseInt(req.query.page) : 0; 
+  const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : Number.MAX_SAFE_INTEGER;
+  
+  const skip = page > 0 ? (page - 1) * pageSize : 0; 
   const searchKeyword = req.query.searchKeyword;
   let match = {};
 
@@ -116,7 +120,7 @@ UrlRouter.get('/', async (req, res) => {
     path: 'urls',
     select: 'originUrl shortUrl createTime previewImage title',
     match: match,
-    options: { sort: { createTime: -1 } }
+    options: { sort: { createTime: -1 }, skip: skip, limit:pageSize}
   });
   const sanitizedUrlList = urlList.urls.map((url) => ({
     originUrl: url.originUrl,

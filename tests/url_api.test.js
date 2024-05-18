@@ -66,6 +66,22 @@ describe('GET /api/url', () => {
       urlAtStart.filter((u) => u.title.toLowerCase().includes(keyword.toLowerCase())).length
     );
   }, 50000);
+  test('paginate', async () => {
+    const urlAtStart = await helper.urlsInDb();
+    const pageSize = 3;
+    const response = await api
+      .get(`/api/url?page=0&pageSize=${pageSize}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    let len;
+    if(urlAtStart.length <= pageSize){
+      len = urlAtStart.length
+    }else{
+      len = pageSize
+    }
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(len);
+  }, 50000);
 });
 
 describe('POST /api/url', () => {
