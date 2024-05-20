@@ -52,7 +52,7 @@ describe('GET /api/url', () => {
     const response = await api.get('/api/url').set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.length).toBe(helper.initialUrls.length);
+    expect(response.body.content.length).toBe(helper.initialUrls.length);
   }, 50000);
   test('search keyword return right result', async () => {
     const urlAtStart = await helper.urlsInDb();
@@ -62,7 +62,7 @@ describe('GET /api/url', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.length).toBe(
+    expect(response.body.content.length).toBe(
       urlAtStart.filter((u) => u.title.toLowerCase().includes(keyword.toLowerCase())).length
     );
   }, 50000);
@@ -74,13 +74,13 @@ describe('GET /api/url', () => {
       .set('Authorization', `Bearer ${token}`);
 
     let len;
-    if(urlAtStart.length <= pageSize){
-      len = urlAtStart.length
-    }else{
-      len = pageSize
+    if (urlAtStart.length <= pageSize) {
+      len = urlAtStart.length;
+    } else {
+      len = pageSize;
     }
     expect(response.status).toBe(200);
-    expect(response.body.length).toBe(len);
+    expect(response.body.content.length).toBe(len);
   }, 50000);
 });
 

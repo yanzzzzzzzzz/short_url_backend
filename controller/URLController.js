@@ -106,10 +106,10 @@ UrlRouter.get('/', async (req, res) => {
   if (user == null) {
     return res.json([]);
   }
-  const page = req.query.page ? parseInt(req.query.page) : 0; 
-  const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : Number.MAX_SAFE_INTEGER;
-  
-  const skip = page > 0 ? (page - 1) * pageSize : 0; 
+  const page = req.query.page ? parseInt(req.query.page) : 0;
+  const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 1000;
+
+  const skip = page > 0 ? (page - 1) * pageSize : 0;
   const searchKeyword = req.query.searchKeyword;
   let match = {};
 
@@ -120,8 +120,17 @@ UrlRouter.get('/', async (req, res) => {
     path: 'urls',
     select: 'originUrl shortUrl createTime previewImage title',
     match: match,
-    options: { sort: { createTime: -1 }, skip: skip, limit:pageSize}
+    options: { sort: { createTime: -1 }, skip: skip, limit: pageSize }
   });
+  const totalCount = await User.aggregate([
+    { $match: { email: user.email } },
+    { $unwind: '$urls' },
+    { $match: match },
+    { $count: 'total' }
+  ]);
+  const totalRecords = totalCount.length > 0 ? totalCount[0].total : 0;
+  const pageCount = Math.ceil(totalRecords / pageSize);
+  const hasNext = page < pageCount;
   const sanitizedUrlList = urlList.urls.map((url) => ({
     originUrl: url.originUrl,
     shortUrl: url.shortUrl,
@@ -129,7 +138,15 @@ UrlRouter.get('/', async (req, res) => {
     previewImage: url.previewImage,
     title: url.title
   }));
-  return res.json(sanitizedUrlList);
+  return res.json({
+    content: sanitizedUrlList,
+    pagination: {
+      page: page,
+      size: pageSize,
+      hasNext: hasNext,
+      pageCount: pageCount
+    }
+  });
 });
 
 UrlRouter.delete('/:shortUrl', async (req, res) => {
