@@ -109,7 +109,7 @@ UrlRouter.get('/', async (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 0;
   const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 1000;
 
-  const skip = page > 0 ? (page - 1) * pageSize : 0;
+  const skip = page > 0 ? page * pageSize : 0;
   const searchKeyword = req.query.searchKeyword;
   let match = {};
 
@@ -122,14 +122,11 @@ UrlRouter.get('/', async (req, res) => {
     match: match,
     options: { sort: { createTime: -1 }, skip: skip, limit: pageSize }
   });
-  const totalCount = await User.aggregate([
-    { $match: { email: user.email } },
-    { $unwind: '$urls' },
-    { $match: match },
-    { $count: 'total' }
-  ]);
-  const totalRecords = totalCount.length > 0 ? totalCount[0].total : 0;
-  const pageCount = Math.ceil(totalRecords / pageSize);
+  const userCount = await User.findOne({ email: user.email }).populate({
+    path: 'urls',
+    match: match
+  });
+  const pageCount = Math.ceil(userCount.urls.length / pageSize);
   const hasNext = page < pageCount;
   const sanitizedUrlList = urlList.urls.map((url) => ({
     originUrl: url.originUrl,
