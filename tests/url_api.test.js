@@ -101,7 +101,6 @@ describe('POST /api/url', () => {
     const urlsAtEnd = await User.findOne({ email: testUser.email }).populate({
       path: 'urls'
     });
-    console.log('urlsAtEnd', urlsAtEnd);
 
     expect(urlsAtEnd.urls).toHaveLength(urlsAtStart.urls.length + 1);
   });

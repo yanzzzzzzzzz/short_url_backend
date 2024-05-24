@@ -5,6 +5,7 @@ const helper = require('./test_helper');
 const bcrypt = require('bcrypt');
 const app = require('../app');
 const api = supertest(app);
+const redisClient = require('../Service/RedisService');
 
 let testUser;
 
@@ -40,4 +41,8 @@ describe('login api', () => {
 afterEach(async () => {
   await User.deleteMany({});
   await Url.deleteMany({});
+});
+
+afterAll(() => {
+  redisClient.disconnect();
 });

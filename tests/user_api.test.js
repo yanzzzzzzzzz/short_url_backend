@@ -5,6 +5,8 @@ const Url = require('../models/url');
 const helper = require('./test_helper');
 const app = require('../app');
 const api = supertest(app);
+const redisClient = require('../Service/RedisService');
+
 describe('POST /api/users', () => {
   beforeEach(async () => {
     await User.deleteMany({});
@@ -149,4 +151,8 @@ describe('GET /api/users', () => {
       .expect('Content-Type', /application\/json/);
     expect(response.body.urls).toHaveLength(helper.initialUrls.length);
   });
+});
+
+afterAll(() => {
+  redisClient.disconnect();
 });
