@@ -1,10 +1,9 @@
 const UrlRouter = require('express').Router();
 const Url = require('../models/url');
 const User = require('../models/user');
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
 const { generateRandomString } = require('../utils/randomString');
 const redisClient = require('../Service/RedisService');
+const { getUrlInfo, isValidUrl } = require('../utils/url');
 
 async function generateUniqueRandomString() {
   let randomString;
@@ -14,29 +13,6 @@ async function generateUniqueRandomString() {
     existingUrl = await Url.findOne({ shortUrl: randomString });
   } while (existingUrl);
   return randomString;
-}
-async function getUrlInformation(url) {
-  try {
-    const response = await fetch(url);
-    const htmlContent = await response.text();
-    const $ = cheerio.load(htmlContent);
-    const title = $('title').text();
-    const description = $('meta[name="description"]').attr('content');
-    const previewImage = $('meta[property="og:image"]').attr('content');
-
-    return { title, description, previewImage };
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-function isValidUrl(string) {
-  try {
-    new URL(string);
-  } catch (_) {
-    return false;
-  }
-  return true;
 }
 
 UrlRouter.post('/', async (req, res) => {
@@ -48,7 +24,7 @@ UrlRouter.post('/', async (req, res) => {
   }
   const customShortUrl = req.body.customShortUrl;
   let shortUrl;
-  if (customShortUrl === undefined || customShortUrl === '') {
+  if (!customShortUrl) {
     shortUrl = await generateUniqueRandomString();
   } else {
     shortUrl = customShortUrl;
@@ -58,10 +34,9 @@ UrlRouter.post('/', async (req, res) => {
     }
   }
 
-  const urlInfo = await getUrlInformation(originUrl);
-  const datenow = new Date();
+  const urlInfo = await getUrlInfo(originUrl);
   const urlObj = {
-    createTime: datenow.toISOString().replace('T', ' ').substring(0, 19),
+    createTime: new Date().toISOString().replace('T', ' ').substring(0, 19),
     title: urlInfo.title,
     previewImage: urlInfo.previewImage,
     originUrl,
@@ -70,7 +45,7 @@ UrlRouter.post('/', async (req, res) => {
   const urlModel = new Url({ ...urlObj, user: user?._id });
   const savedUrl = await urlModel.save();
   await redisClient.set(shortUrl, originUrl, 'EX', 60 * 60);
-  if (savedUrl != null && user != null) {
+  if (user != null) {
     user.urls = user.urls.concat(savedUrl._id);
     await user.save();
   }
