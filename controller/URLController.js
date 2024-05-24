@@ -56,7 +56,7 @@ UrlRouter.post('/', async (req, res) => {
 UrlRouter.get('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const originalUrlOnRedis = await redisClient.get(shortUrl);
-  if (originalUrlOnRedis !== null) {
+  if (originalUrlOnRedis) {
     return res.redirect(originalUrlOnRedis);
   }
   const url = await Url.findOne({ shortUrl });
