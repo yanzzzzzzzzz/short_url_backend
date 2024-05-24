@@ -111,6 +111,8 @@ describe('POST /api/users', () => {
 describe('GET /api/users', () => {
   beforeEach(async () => {
     await User.deleteMany({});
+    await Url.deleteMany({});
+
     for (let initialUser of helper.initialUsers) {
       const passwordHash = await bcrypt.hash(initialUser.password, 10);
       const user = new User({
@@ -120,7 +122,7 @@ describe('GET /api/users', () => {
       });
       await user.save();
     }
-    const testUser = await User.findOne({ username: helper.initialUsers[0].username });
+    let testUser = await User.findOne({ username: helper.initialUsers[0].username });
     for (let index = 0; index < helper.initialUrls.length; index++) {
       const urlData = helper.initialUrls[index];
       const urlModel = new Url({
@@ -129,6 +131,7 @@ describe('GET /api/users', () => {
         user: testUser._id
       });
       const savedUrl = await urlModel.save();
+      testUser = await User.findById(testUser._id);
       testUser.urls = testUser.urls.concat(savedUrl._id);
       await testUser.save();
     }

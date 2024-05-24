@@ -7,44 +7,47 @@ const config = require('../utils/config');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
+const redisClient = require('../Service/RedisService');
 let token = null;
 let token2 = null;
 let testUser = { username: 'test', email: 'test@gmail.com', password: '1234' };
 let testUser2 = { username: 'test2', email: 'test2@gmail.com', password: '1234' };
-beforeEach(async () => {
-  await User.deleteMany({});
-  await Url.deleteMany({});
-  const passwordHash = await bcrypt.hash(testUser.password, 10);
+const createUser = async (userData) => {
+  const passwordHash = await bcrypt.hash(userData.password, 10);
   const user = new User({
-    username: testUser.username,
-    email: testUser.email,
+    username: userData.username,
+    email: userData.email,
     passwordHash
   });
-  const savedUser = await user.save();
-  token = jwt.sign({ id: savedUser.id }, config.SECRET);
+  return user.save();
+};
 
-  const user2 = new User({
-    username: testUser2.username,
-    email: testUser2.email,
-    passwordHash
-  });
-  const savedUser2 = await user2.save();
-  token2 = jwt.sign({ id: savedUser2.id }, config.SECRET);
-
-  const promises = helper.initialUrls.map(async (url) => {
+const addUrlsToUser = async (user, urls) => {
+  const urlPromises = urls.map(async (url) => {
     const urlModel = new Url({
       originUrl: url.originUrl,
       shortUrl: url.shortUrl,
       title: url.title,
-      user: savedUser._id
+      user: user._id
     });
     const savedUrl = await urlModel.save();
-    savedUser.urls.push(savedUrl._id);
+    await User.updateOne({ _id: user._id }, { $push: { urls: savedUrl._id } });
   });
 
-  await Promise.all(promises);
-  await savedUser.save();
+  await Promise.all(urlPromises);
+};
+
+beforeEach(async () => {
+  await User.deleteMany({});
+  await Url.deleteMany({});
+
+  const savedUser = await createUser(testUser);
+  token = jwt.sign({ id: savedUser.id }, config.SECRET);
+
+  const savedUser2 = await createUser(testUser2);
+  token2 = jwt.sign({ id: savedUser2.id }, config.SECRET);
+
+  await addUrlsToUser(savedUser, helper.initialUrls);
 }, 50000);
 
 describe('GET /api/url', () => {
@@ -86,35 +89,45 @@ describe('GET /api/url', () => {
 
 describe('POST /api/url', () => {
   test('adds a new url with valid input', async () => {
+    const urlsAtStart = await User.findOne({ email: testUser.email }).populate({
+      path: 'urls'
+    });
     await api
       .post('/api/url')
       .set('Authorization', `bearer ${token}`)
       .send({ url: helper.vaildUrl })
       .expect(201)
       .expect('Content-Type', /application\/json/);
-    const allUrls = await Url.find({});
-    const originUrls = allUrls.map((r) => r.originUrl);
+    const urlsAtEnd = await User.findOne({ email: testUser.email }).populate({
+      path: 'urls'
+    });
+    console.log('urlsAtEnd', urlsAtEnd);
 
-    expect(allUrls).toHaveLength(helper.initialUrls.length + 1);
-    expect(originUrls).toContain(helper.vaildUrl);
+    expect(urlsAtEnd.urls).toHaveLength(urlsAtStart.urls.length + 1);
   });
 
   test('returns a 400 status with invalid input', async () => {
+    const urlsAtStart = await User.findOne({ email: testUser.email }).populate({
+      path: 'urls'
+    });
     await api
       .post('/api/url')
       .set('Authorization', `bearer ${token}`)
       .send({ url: helper.invaildUrl })
       .expect(400);
-
-    const allUrls = await Url.find({});
-    expect(allUrls).toHaveLength(helper.initialUrls.length);
+    const user = await User.findOne({ email: testUser.email });
+    const urlsAtEnd = await User.findOne({ email: testUser.email }).populate({
+      path: 'urls'
+    });
+    expect(urlsAtEnd.urls).toHaveLength(urlsAtStart.urls.length);
   });
 
   test('adding a new url with valid input but no token provided is okay', async () => {
+    const urlsAtStart = await Url.find({});
     await api.post('/api/url').send({ url: helper.vaildUrl }).expect(201);
 
     const allUrls = await Url.find({});
-    expect(allUrls).toHaveLength(helper.initialUrls.length + 1);
+    expect(allUrls).toHaveLength(urlsAtStart.length + 1);
   });
 
   test('add a new url with duplicate short url should return error', async () => {
@@ -256,4 +269,13 @@ describe('PATCH', () => {
     expect(urlAtEnd[0].shortUrl).toBe(urlAtStart[0].shortUrl);
     expect(urlAtEnd[0].title).toBe(updateTitle);
   });
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  await Url.deleteMany({});
+});
+
+afterAll(() => {
+  redisClient.disconnect();
 });

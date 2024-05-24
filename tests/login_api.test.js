@@ -36,3 +36,8 @@ describe('login api', () => {
       .expect(401);
   }, 50000);
 });
+
+afterEach(async () => {
+  await User.deleteMany({});
+  await Url.deleteMany({});
+});

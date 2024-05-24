@@ -3,24 +3,16 @@ const Url = require('../models/url');
 const User = require('../models/user');
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
-
-const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const { generateRandomString } = require('../utils/randomString');
 const redisClient = require('../Service/RedisService');
 
-function generateRandomString() {
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
 async function generateUniqueRandomString() {
-  let randomString = generateRandomString();
-  let existingUrl = await Url.findOne({ shortUrl: randomString });
-  while (existingUrl) {
+  let randomString;
+  let existingUrl;
+  do {
     randomString = generateRandomString();
     existingUrl = await Url.findOne({ shortUrl: randomString });
-  }
+  } while (existingUrl);
   return randomString;
 }
 async function getUrlInformation(url) {
@@ -111,11 +103,8 @@ UrlRouter.get('/', async (req, res) => {
 
   const skip = page > 0 ? page * pageSize : 0;
   const searchKeyword = req.query.searchKeyword;
-  let match = {};
+  const match = searchKeyword ? { title: { $regex: searchKeyword, $options: 'i' } } : {};
 
-  if (searchKeyword) {
-    match = { title: { $regex: searchKeyword, $options: 'i' } };
-  }
   const urlList = await User.findOne({ email: user.email }).populate({
     path: 'urls',
     select: 'originUrl shortUrl createTime previewImage title',
