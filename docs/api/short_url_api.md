@@ -80,23 +80,39 @@ sequenceDiagram
 
 ### Request
 
-| Field  | Type   | Required | Description | Default |
-| ------ | ------ | :------: | ----------- |----------- |
-| page    | string | No      | 分頁功能，要取出的頁數 | 0 |
-| pageSize    | string | No      | 分頁功能，每一頁的數量 | 1000 |
-| searchKeyword    | string | No      | url title關鍵字搜尋 | |
+| Field         | Type   | Required | Description                                 | Default |
+| ------------- | ------ | :------: | ------------------------------------------- | ------- |
+| page          | string |    No    | The page number to retrieve (for pagination) | 0       |
+| pageSize      | string |    No    | The number of items per page (for pagination) | 1000    |
+| searchKeyword | string |    No    | Keyword to search in the URL titles          |         |
 
 ### Response
 
 * Returns an array of objects representing the URLs.
 
-| Field   | Type   | Description |
-| ------- | ------ | ----------- |
-| originUrl  | string | 原始網址 |
-| shortUrl    | string | 短網址 |
-| createTime    | string | 建立時間 |
-| title    | string | 原始網址標題 |
-| previewImage | string | 預覽圖片 |
+| Field      | Type             | Description               |
+| ---------- | ---------------- | ------------------------- |
+| content    | List of Url      | A list of URL objects     |
+| pagination | PaginationData   | Pagination details        |
+
+#### Url
+
+| Field        | Type   | Description                    |
+| ------------ | ------ | ------------------------------ |
+| originUrl    | string | The original URL               |
+| shortUrl     | string | The shortened URL              |
+| createTime   | string | The time when the URL was created |
+| title        | string | The title of the original URL  |
+| previewImage | string | A preview image of the URL     |
+
+#### PaginationData
+
+| Field   | Type    | Description                  |
+| ------- | ------- | ---------------------------- |
+| page    | number  | The current page number      |
+| size    | number  | The number of items per page |
+| hasNext | boolean | Indicates if there is a next page |
+| pageCount | number | The total number of pages    |
 
 ### Flow
 
@@ -114,7 +130,7 @@ sequenceDiagram
         server ->> client: reponse 200: OK.
     else
         Note over server, db: User logged in.
-        server ->> db: Querying the URL data table.
+        server ->> db: Querying the URL data table.<br>Include page, page size, and keyword if specified.
         db ->> server: Return URL data.
         server ->> client: reponse 200: OK
     end
