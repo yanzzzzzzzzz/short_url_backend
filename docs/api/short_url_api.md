@@ -80,7 +80,11 @@ sequenceDiagram
 
 ### Request
 
-* None
+| Field  | Type   | Required | Description | Default |
+| ------ | ------ | :------: | ----------- |----------- |
+| page    | string | No      | 分頁功能，要取出的頁數 | 0 |
+| pageSize    | string | No      | 分頁功能，每一頁的數量 | 1000 |
+| searchKeyword    | string | No      | url title關鍵字搜尋 | |
 
 ### Response
 
