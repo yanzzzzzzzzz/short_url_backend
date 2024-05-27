@@ -174,3 +174,53 @@ sequenceDiagram
         end
     end
 ```
+
+## DELETE /api/rul/{shortUrl}
+
+### Authorization
+
+* JWT
+
+### Request
+
+* None
+
+### Response
+
+* None
+
+### Flow
+
+```mermaid
+sequenceDiagram
+    participant client
+    participant server
+    participant redis
+    participant db
+    
+    autonumber 1
+    client ->> server: [DELETE] /api/url/{shortUrl}
+    server ->> db: 檢查URL是否存在
+    alt
+        Note over server, db: 資料不存在.
+        server ->> client: reponse 404: URL not found.
+    else
+        Note over server, db: 資料存在.
+        server ->> db: 檢查url是否由guest創建
+        alt
+            Note over server, db: url由guest創建.
+            server ->> client: response 401:<br>This URL was created by a guest or an unauthenticated user.<br>Please create account/log in to perform more actions
+        else 
+            Note over server, db: url由user創建.
+            server ->> db: 檢查登入user是否跟創建url同一個人.
+            alt 
+                Note over server, db: 不同人.
+                server ->> client: reponse 403:<br> Unauthorized: Cannot delete URL created by another user
+            else
+                Note over server, db: 同一人.
+                server->>db:delete URL.
+                server->>client: response 204
+            end
+        end
+    end
+```
