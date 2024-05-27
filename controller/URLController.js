@@ -120,7 +120,7 @@ UrlRouter.delete('/:shortUrl', async (req, res) => {
         .status(401)
         .json({
           error:
-            'This URL was created by a guest or an unauthenticated user. Please log in to perform more actions.'
+            'This URL was created by a guest or an unauthenticated user. Please create account/log in to perform more actions.'
         })
         .end();
     }
