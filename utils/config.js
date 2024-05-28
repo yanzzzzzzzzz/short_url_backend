@@ -7,10 +7,10 @@ const SECRET = process.env.SECRET;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 const REDIS_HOST = process.env.REDIS_HOST;
 const REDIS_PORT = process.env.REDIS_PORT;
-const GoogleClientId = process.env.googleClientId;
-const GoogleClientSecret = process.env.googleClientSecret;
-const GoogleOauthRedirectUrl = process.env.googleOauthRedirectUrl;
-const FrontEndUrl = process.env.frontEndUrl;
+const GoogleClientId = process.env.GOOGLE_CLIENT_ID;
+const GoogleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const GoogleOauthRedirectUrl = process.env.GOOGLE_OAUTH_REDIRECT_URL;
+const FrontEndUrl = process.env.FRONTEND_URL;
 module.exports = {
   PORT,
   MONGODB_URI,
