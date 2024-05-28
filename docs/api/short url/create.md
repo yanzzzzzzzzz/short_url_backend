@@ -27,7 +27,7 @@ Request Body
 
 ### Status code
 
-* **200 OK**: Successful create the URL.
+* **201 Created**: Successful create the URL.
 * **400 Bad Request**: Invalid input URL format.
 * **409 Conflict**: Duplicate short URL exists.
 
@@ -65,7 +65,7 @@ sequenceDiagram
             server ->> db: Write data to database<br>table: users
         end
         
-        server ->> client: response 200: OK
+        server ->> client: response 201: Created
     end
 
 ```

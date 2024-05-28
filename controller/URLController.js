@@ -19,7 +19,7 @@ UrlRouter.post('/', async (req, res) => {
   const originUrl = req.body.url;
   const user = req.user;
   if (originUrl === undefined || !isValidUrl(originUrl)) {
-    res.status(400).json({ error: 'url is invalid' }).end();
+    res.status(400).json({ error: 'Invalid input URL format' }).end();
     return;
   }
   const customShortUrl = req.body.customShortUrl;
@@ -30,7 +30,7 @@ UrlRouter.post('/', async (req, res) => {
     shortUrl = customShortUrl;
     let existingUrl = await Url.findOne({ shortUrl });
     if (existingUrl !== null) {
-      return res.status(400).json({ error: 'Duplicate short URL exists.' }).end();
+      return res.status(409).json({ error: 'Duplicate short URL exists' }).end();
     }
   }
 

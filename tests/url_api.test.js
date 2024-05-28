@@ -135,7 +135,7 @@ describe('POST /api/url', () => {
       .post('/api/url')
       .set('Authorization', `bearer ${token}`)
       .send({ url: allUrls[0].originUrl, customShortUrl: allUrls[0].shortUrl })
-      .expect(400)
+      .expect(409)
       .expect('Content-Type', /application\/json/);
   });
 
