@@ -85,6 +85,9 @@ describe('GET /api/url', () => {
     expect(response.status).toBe(200);
     expect(response.body.content.length).toBe(len);
   }, 50000);
+  test('Attempt to access a non-existent short URL', async () => {
+    await api.get(`/api/url/thisUrlNotExist`).expect(404);
+  });
 });
 
 describe('POST /api/url', () => {
