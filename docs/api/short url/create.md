@@ -12,18 +12,24 @@ Request Body
 
 | Field  | Type   | Required | Description |
 | ------ | ------ | :------: | ----------- |
-| url    | string | Yes      | 原始網址 |
-| customShortUrl    | string | No      | 自定義短網址 |
+| url    | string | Yes      | Original URL |
+| customShortUrl    | string | No      | Custom short URL |
 
 ## Response
 
 | Field   | Type   | Description |
 | ------- | ------ | ----------- |
-| originUrl  | string | 原始網址 |
-| shortUrl    | string | 短網址 |
-| createTime    | string | 建立時間 |
-| title    | string | 原始網址標題 |
-| previewImage | string | 預覽圖片 |
+| originUrl  | string | Original URL |
+| shortUrl    | string | Short URL |
+| createTime    | string | Creation time |
+| title    | string | Original URL title |
+| previewImage | string | Preview image |
+
+### Status code
+
+* **200 OK**: Successful create the URL.
+* **400 Bad Request**: Invalid input URL format.
+* **409 Conflict**: Duplicate short URL exists.
 
 ## Flow
 
@@ -38,16 +44,16 @@ sequenceDiagram
     client ->> server: [POST] /api/url
     Note over server: Check if the input URL is valid
     alt URL is invalid
-        server ->> client: response 400: URL is invalid
+        server ->> client: response 400: Bad Request<br>{error: "Invalid input URL format"}
     else URL is valid
         autonumber 2
         Note over server: Check if custom short URL is provided
         alt Custom short URL is provided
             server ->> db: Check for duplicate in database
             alt Duplicate exists
-                server ->> client: response 400: Duplicate short URL exists
+                server ->> client: response 409: Conflict<br>{error: "Duplicate short URL exists"}
             else No duplicate, use custom short URL
-        end
+            end
         else No custom short URL provided
             server ->> server: Generate a unique short URL
         end

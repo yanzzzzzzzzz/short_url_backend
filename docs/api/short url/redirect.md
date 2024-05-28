@@ -8,8 +8,10 @@
 
 ## Response
 
-* Redirect to the original URL with status code 302 if found.
-* Return status code 404 if the URL is not found.
+### Status code
+
+* **302 Found**: Redirect to the original URL.
+* **404 Not Found**: The URL is not found.
 
 ## Flow
 
