@@ -64,7 +64,7 @@ UrlRouter.get('/:shortUrl', async (req, res) => {
     redisClient.set(url.shortUrl, url.originUrl, 'EX', 60 * 60);
     return res.redirect(url.originUrl);
   } else {
-    res.status(400).end();
+    res.status(404).end();
   }
 });
 
