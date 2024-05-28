@@ -50,7 +50,7 @@ UrlRouter.post('/', async (req, res) => {
     await user.save();
   }
 
-  res.status(201).json(urlObj);
+  res.status(201).json(urlObj).end();
 });
 
 UrlRouter.get('/:shortUrl', async (req, res) => {
@@ -71,7 +71,7 @@ UrlRouter.get('/:shortUrl', async (req, res) => {
 UrlRouter.get('/', async (req, res) => {
   const user = req.user;
   if (user == null) {
-    return res.json([]);
+    return res.json([]).end();
   }
   const page = req.query.page ? parseInt(req.query.page) : 0;
   const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 1000;
@@ -99,43 +99,43 @@ UrlRouter.get('/', async (req, res) => {
     previewImage: url.previewImage,
     title: url.title
   }));
-  return res.json({
-    content: sanitizedUrlList,
-    pagination: {
-      page: page,
-      size: pageSize,
-      hasNext: hasNext,
-      pageCount: pageCount
-    }
-  });
+  return res
+    .json({
+      content: sanitizedUrlList,
+      pagination: {
+        page: page,
+        size: pageSize,
+        hasNext: hasNext,
+        pageCount: pageCount
+      }
+    })
+    .end();
 });
 
 UrlRouter.delete('/:shortUrl', async (req, res) => {
   const { shortUrl } = req.params;
   const url = await Url.findOne({ shortUrl: shortUrl });
-
-  if (url) {
-    if (!url.user) {
-      return res
-        .status(401)
-        .json({
-          error:
-            'This URL was created by a guest or an unauthenticated user. Please create account/log in to perform more actions.'
-        })
-        .end();
-    }
-    if (req.user._id.toString() !== url.user._id.toString()) {
-      return res.status(403).json({ error: 'Cannot delete URL by another user' }).end();
-    }
-    await Url.findByIdAndDelete(url._id);
-    const checkUrlOnRedis = await redisClient.get(url.shortUrl);
-    if (checkUrlOnRedis) {
-      await redisClient.del(url.shortUrl);
-    }
-    res.status(204).end();
-  } else {
-    res.status(404).json({ error: 'URL not found' }).end();
+  if (!url) {
+    return res.status(404).json({ error: 'URL not found' }).end();
   }
+  if (!url.user) {
+    return res
+      .status(401)
+      .json({
+        error:
+          'This URL was created by a guest or an unauthenticated user. Please create account/log in to perform more actions'
+      })
+      .end();
+  }
+  if (req.user._id.toString() !== url.user._id.toString()) {
+    return res.status(403).json({ error: 'Unauthorized: Cannot delete URL by another user' });
+  }
+  await Url.findByIdAndDelete(url._id);
+  const checkUrlOnRedis = await redisClient.get(url.shortUrl);
+  if (checkUrlOnRedis) {
+    await redisClient.del(url.shortUrl);
+  }
+  return res.status(204).end();
 });
 
 UrlRouter.put('/:shortUrl', async (req, res) => {
