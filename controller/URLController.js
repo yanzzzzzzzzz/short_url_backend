@@ -125,12 +125,13 @@ UrlRouter.delete('/:shortUrl', async (req, res) => {
         .end();
     }
     if (req.user._id.toString() !== url.user._id.toString()) {
-      return res
-        .status(403)
-        .json({ error: 'Unauthorized: Cannot delete URL created by another user' })
-        .end();
+      return res.status(403).json({ error: 'Cannot delete URL by another user' }).end();
     }
     await Url.findByIdAndDelete(url._id);
+    const checkUrlOnRedis = await redisClient.get(url.shortUrl);
+    if (checkUrlOnRedis) {
+      await redisClient.del(url.shortUrl);
+    }
     res.status(204).end();
   } else {
     res.status(404).json({ error: 'URL not found' }).end();
