@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('express-async-errors');
 const app = express();
-const UrlRouter = require('./controller/URLController');
+const UrlRouter = require('./routes/urlRouter');
 const usersRouter = require('./controller/UsersController');
 const loginRouter = require('./controller/LoginController');
 const googleAuthRouter = require('./controller/GoogleAuthController');

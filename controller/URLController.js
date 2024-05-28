@@ -1,4 +1,3 @@
-const UrlRouter = require('express').Router();
 const Url = require('../models/url');
 const User = require('../models/user');
 const { generateRandomString } = require('../utils/randomString');
@@ -15,12 +14,11 @@ async function generateUniqueRandomString() {
   return randomString;
 }
 
-UrlRouter.post('/', async (req, res) => {
+exports.createShortUrl = async (req, res) => {
   const originUrl = req.body.url;
   const user = req.user;
-  if (originUrl === undefined || !isValidUrl(originUrl)) {
-    res.status(400).json({ error: 'Invalid input URL format' }).end();
-    return;
+  if (!originUrl || !isValidUrl(originUrl)) {
+    return res.status(400).json({ error: 'Invalid input URL format' });
   }
   const customShortUrl = req.body.customShortUrl;
   let shortUrl;
@@ -28,9 +26,9 @@ UrlRouter.post('/', async (req, res) => {
     shortUrl = await generateUniqueRandomString();
   } else {
     shortUrl = customShortUrl;
-    let existingUrl = await Url.findOne({ shortUrl });
-    if (existingUrl !== null) {
-      return res.status(409).json({ error: 'Duplicate short URL exists' }).end();
+    const existingUrl = await Url.findOne({ shortUrl });
+    if (existingUrl) {
+      return res.status(409).json({ error: 'Duplicate short URL exists' });
     }
   }
 
@@ -40,20 +38,21 @@ UrlRouter.post('/', async (req, res) => {
     title: urlInfo.title,
     previewImage: urlInfo.previewImage,
     originUrl,
-    shortUrl
+    shortUrl,
+    user: user?._id
   };
-  const urlModel = new Url({ ...urlObj, user: user?._id });
+  const urlModel = new Url(urlObj);
   const savedUrl = await urlModel.save();
   await redisClient.set(shortUrl, originUrl, 'EX', 60 * 60);
-  if (user != null) {
-    user.urls = user.urls.concat(savedUrl._id);
+  if (user) {
+    user.urls.push(savedUrl._id);
     await user.save();
   }
 
-  res.status(201).json(urlObj).end();
-});
+  res.status(201).json(urlObj);
+};
 
-UrlRouter.get('/:shortUrl', async (req, res) => {
+exports.redirectShortUrl = async (req, res) => {
   const { shortUrl } = req.params;
   const originalUrlOnRedis = await redisClient.get(shortUrl);
   if (originalUrlOnRedis) {
@@ -61,17 +60,17 @@ UrlRouter.get('/:shortUrl', async (req, res) => {
   }
   const url = await Url.findOne({ shortUrl });
   if (url) {
-    redisClient.set(url.shortUrl, url.originUrl, 'EX', 60 * 60);
+    await redisClient.set(url.shortUrl, url.originUrl, 'EX', 60 * 60);
     return res.redirect(url.originUrl);
   } else {
     res.status(404).end();
   }
-});
+};
 
-UrlRouter.get('/', async (req, res) => {
+exports.getUserUrls = async (req, res) => {
   const user = req.user;
-  if (user == null) {
-    return res.json([]).end();
+  if (!user) {
+    return res.json([]);
   }
   const page = req.query.page ? parseInt(req.query.page) : 0;
   const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 1000;
@@ -83,12 +82,12 @@ UrlRouter.get('/', async (req, res) => {
   const urlList = await User.findOne({ email: user.email }).populate({
     path: 'urls',
     select: 'originUrl shortUrl createTime previewImage title',
-    match: match,
-    options: { sort: { createTime: -1 }, skip: skip, limit: pageSize }
+    match,
+    options: { sort: { createTime: -1 }, skip, limit: pageSize }
   });
   const userCount = await User.findOne({ email: user.email }).populate({
     path: 'urls',
-    match: match
+    match
   });
   const pageCount = Math.ceil(userCount.urls.length / pageSize);
   const hasNext = page < pageCount;
@@ -99,33 +98,28 @@ UrlRouter.get('/', async (req, res) => {
     previewImage: url.previewImage,
     title: url.title
   }));
-  return res
-    .json({
-      content: sanitizedUrlList,
-      pagination: {
-        page: page,
-        size: pageSize,
-        hasNext: hasNext,
-        pageCount: pageCount
-      }
-    })
-    .end();
-});
+  res.json({
+    content: sanitizedUrlList,
+    pagination: {
+      page,
+      size: pageSize,
+      hasNext,
+      pageCount
+    }
+  });
+};
 
-UrlRouter.delete('/:shortUrl', async (req, res) => {
+exports.deleteShortUrl = async (req, res) => {
   const { shortUrl } = req.params;
-  const url = await Url.findOne({ shortUrl: shortUrl });
+  const url = await Url.findOne({ shortUrl });
   if (!url) {
-    return res.status(404).json({ error: 'URL not found' }).end();
+    return res.status(404).json({ error: 'URL not found' });
   }
   if (!url.user) {
-    return res
-      .status(401)
-      .json({
-        error:
-          'This URL was created by a guest or an unauthenticated user. Please create account/log in to perform more actions'
-      })
-      .end();
+    return res.status(401).json({
+      error:
+        'This URL was created by a guest or an unauthenticated user. Please create account/log in to perform more actions'
+    });
   }
   if (req.user._id.toString() !== url.user._id.toString()) {
     return res.status(403).json({ error: 'Unauthorized: Cannot delete URL by another user' });
@@ -135,19 +129,18 @@ UrlRouter.delete('/:shortUrl', async (req, res) => {
   if (checkUrlOnRedis) {
     await redisClient.del(url.shortUrl);
   }
-  return res.status(204).end();
-});
+  res.status(204).end();
+};
 
-UrlRouter.put('/:shortUrl', async (req, res) => {
+exports.updateShortUrl = async (req, res) => {
   const { shortUrl } = req.params;
   const body = req.body;
-  const url = await Url.findOne({ shortUrl: shortUrl });
+  const url = await Url.findOne({ shortUrl });
   if (url) {
     if (req.user._id.toString() !== url.user._id.toString()) {
-      res
+      return res
         .status(403)
-        .json({ error: 'Unauthorized: Cannot modify URL created by another user' })
-        .end();
+        .json({ error: 'Unauthorized: Cannot modify URL created by another user' });
     }
     await Url.findByIdAndUpdate(url._id, {
       originUrl: body.originUrl,
@@ -157,27 +150,25 @@ UrlRouter.put('/:shortUrl', async (req, res) => {
   } else {
     res.status(404).end();
   }
-});
+};
 
-UrlRouter.patch('/:shortUrl', async (req, res) => {
+exports.patchShortUrl = async (req, res) => {
   const { shortUrl } = req.params;
   const { newShortUrl, newTitle } = req.body;
-  const url = await Url.findOne({ shortUrl: shortUrl });
+  const url = await Url.findOne({ shortUrl });
   if (!url) {
     return res.status(404).end();
   }
-  if (newShortUrl !== undefined && newShortUrl !== shortUrl) {
+  if (newShortUrl && newShortUrl !== shortUrl) {
     const existingUrl = await Url.findOne({ shortUrl: newShortUrl });
     if (existingUrl) {
       return res.status(409).end();
     }
     url.shortUrl = newShortUrl;
   }
-  if ((newTitle !== null) | (newTitle !== undefined)) {
+  if (newTitle !== null && newTitle !== undefined) {
     url.title = newTitle;
   }
   await url.save();
-  return res.status(200).json(url).end();
-});
-
-module.exports = UrlRouter;
+  res.status(200).json(url).end();
+};
