@@ -1,9 +1,8 @@
 const bcrypt = require('bcrypt');
-const usersRouter = require('express').Router();
 const User = require('../models/user');
 const auth = require('../utils/auth');
 
-usersRouter.post('/', async (req, res) => {
+exports.createUser = async (req, res) => {
   const { username, email, password } = req.body;
   if (!isValidEmail(email)) {
     return res.status(400).json({ error: 'email is invalid' });
@@ -32,21 +31,20 @@ usersRouter.post('/', async (req, res) => {
 
   auth.setAuthCookies(savedUser, res);
   res.status(201).json(savedUser);
-});
+};
 
 function isValidEmail(email) {
   var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(email);
 }
 
-usersRouter.get('/', async (req, res) => {
+exports.getUserCreateUrls = async (req, res) => {
   const users = await User.find({}).populate('urls');
   res.json(users);
-});
+};
 
-usersRouter.get('/:username', async (req, res) => {
+exports.getUser = async (req, res) => {
   const { username } = req.params;
   const user = await User.findOne({ username });
   res.json(user);
-});
-module.exports = usersRouter;
+};
