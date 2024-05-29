@@ -51,4 +51,4 @@ npm run dev
 
 ## API
 
-For API documentation, please refer to the [short_url_api.md](/docs/api/short_url_api.md) file.
+For API documentation, please refer to the [doc](/docs/api/short%20url).
