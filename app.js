@@ -19,7 +19,9 @@ const swaggerDocument = YAML.load('./swagger.yaml');
 
 mongoose
   .connect(config.MONGODB_URI)
-  .then()
+  .then(() => {
+    console.log('Connected to my DB');
+  })
   .catch((error) => {
     console.log('error connecting to MongoDB:', error.message);
   });
