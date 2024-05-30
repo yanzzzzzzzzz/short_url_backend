@@ -6,6 +6,7 @@ const helper = require('./test_helper');
 const app = require('../app');
 const api = supertest(app);
 const redisClient = require('../Service/RedisService');
+const mongoose = require('mongoose');
 
 describe('POST /api/users', () => {
   beforeEach(async () => {
@@ -153,6 +154,7 @@ describe('GET /api/users', () => {
   });
 });
 
-afterAll(() => {
-  redisClient.disconnect();
+afterAll(async () => {
+  await redisClient.disconnect();
+  await mongoose.connection.close();
 });

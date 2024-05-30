@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const redisClient = require('../Service/RedisService');
+const mongoose = require('mongoose');
 let token = null;
 let token2 = null;
 let testUser = { username: 'test', email: 'test@gmail.com', password: '1234' };
@@ -278,6 +279,7 @@ afterEach(async () => {
   await Url.deleteMany({});
 });
 
-afterAll(() => {
-  redisClient.disconnect();
+afterAll(async () => {
+  await redisClient.disconnect();
+  await mongoose.connection.close();
 });

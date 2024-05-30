@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const app = require('../app');
 const api = supertest(app);
 const redisClient = require('../Service/RedisService');
+const mongoose = require('mongoose');
 
 let testUser;
 
@@ -43,6 +44,7 @@ afterEach(async () => {
   await Url.deleteMany({});
 });
 
-afterAll(() => {
-  redisClient.disconnect();
+afterAll(async () => {
+  await redisClient.disconnect();
+  await mongoose.connection.close();
 });
