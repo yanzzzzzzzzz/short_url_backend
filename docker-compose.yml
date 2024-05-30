@@ -1,0 +1,27 @@
+version: '3'
+services:
+  short-url-service:
+    build: .
+    container_name: short-url-service
+    ports:
+      - "4001:4001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WAIT_HOSTS=mongodb:27017
+      - WAIT_HOSTS_TIMEOUT=30
+      - WAIT_SLEEP_INTERVAL=5
+      - WAIT_HOSTS_STRICT=true
+    depends_on:
+      - redis
+      - mongodb
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
