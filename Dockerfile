@@ -8,6 +8,9 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3000
+RUN apt-get update && apt-get install -y redis-server
 
-CMD ["node", "index.js"]
+EXPOSE 4001
+EXPOSE 6379
+
+CMD service redis-server start && node index.js
