@@ -1,41 +1,30 @@
-const googleAuthRouter = require('express').Router();
 const axios = require('axios');
 const qs = require('qs');
 const User = require('../models/user');
 const config = require('../utils/config');
 const auth = require('../utils/auth');
 
-googleAuthRouter.get('/signup', async (req, res) => {
-  const code = req.query.code;
-  const { id_token, access_token } = await getGoogleOAuthTokens(code, 'signup');
-  const googleUser = await getGoogleUser(id_token, access_token);
+exports.auth = async (req, res) => {
+  try {
+    const code = req.query.code;
+    const { id_token, access_token } = await getGoogleOAuthTokens(code, 'auth');
+    const googleUser = await getGoogleUser(id_token, access_token);
 
-  if (!googleUser.verified_email) {
-    return res.status(403).send('Google account is not verified');
+    if (!googleUser.verified_email) {
+      return res.status(403).send('Google account is not verified');
+    }
+    const user = await findAndUpdateUser(googleUser);
+
+    auth.setAuthCookies(user, res);
+    res.redirect(config.FrontEndUrl);
+  } catch (error) {
+    console.error('Error during authentication:', error.message);
+    res.status(500).send('Internal Server Error');
   }
-  const user = await findAndUpdateUser(googleUser);
-
-  auth.setAuthCookies(user, res);
-  res.redirect(config.FrontEndUrl);
-});
-
-googleAuthRouter.get('/login', async (req, res) => {
-  const code = req.query.code;
-  const { id_token, access_token } = await getGoogleOAuthTokens(code, 'login');
-  const googleUser = await getGoogleUser(id_token, access_token);
-
-  if (!googleUser.verified_email) {
-    return res.status(403).send('Google account is not verified');
-  }
-  const user = await findAndUpdateUser(googleUser);
-
-  auth.setAuthCookies(user, res);
-  res.redirect(config.FrontEndUrl);
-});
+};
 
 async function getGoogleOAuthTokens(code, type) {
   const url = 'https://oauth2.googleapis.com/token';
-
   const values = {
     code,
     client_id: config.GoogleClientId,
@@ -52,8 +41,8 @@ async function getGoogleOAuthTokens(code, type) {
     });
     return res.data;
   } catch (error) {
-    console.error(error);
-    throw new Error(error.message);
+    console.error('Error fetching Google OAuth tokens:', error.message);
+    throw new Error('Failed to fetch Google OAuth tokens');
   }
 }
 
@@ -69,27 +58,29 @@ async function getGoogleUser(id_token, access_token) {
     );
     return res.data;
   } catch (error) {
-    console.log(error, 'Error fetch google user');
-    throw new Error(error.message);
+    console.error('Error fetching Google user:', error.message);
+    throw new Error('Failed to fetch Google user');
   }
 }
 
 async function findAndUpdateUser(googleUser) {
-  const user = await User.findOne({ googleId: googleUser.id });
-  if (user === null) {
-    const userModel = new User({
-      username: googleUser.name,
-      name: googleUser.name,
-      email: googleUser.email,
-      googleId: googleUser.id
-    });
-    const savedUser = await userModel.save();
-    console.log('savedUser', savedUser);
-    return savedUser;
-  } else {
-    console.log('already register');
+  try {
+    let user = await User.findOne({ googleId: googleUser.id });
+    if (!user) {
+      user = new User({
+        username: googleUser.name,
+        name: googleUser.name,
+        email: googleUser.email,
+        googleId: googleUser.id
+      });
+      await user.save();
+      console.log('New user registered:', user);
+    } else {
+      console.log('User already registered:', user);
+    }
+    return user;
+  } catch (error) {
+    console.error('Error finding or updating user:', error.message);
+    throw new Error('Failed to find or update user');
   }
-  return user;
 }
-
-module.exports = googleAuthRouter;
