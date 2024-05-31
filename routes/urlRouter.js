@@ -1,12 +1,12 @@
 const express = require('express');
-const UrlRouter = express.Router();
+const urlRouter = express.Router();
 const urlController = require('../controller/URLController');
 
-UrlRouter.post('/', urlController.createShortUrl);
-UrlRouter.get('/:shortUrl', urlController.redirectShortUrl);
-UrlRouter.get('/', urlController.getUserUrls);
-UrlRouter.delete('/:shortUrl', urlController.deleteShortUrl);
-UrlRouter.put('/:shortUrl', urlController.updateShortUrl);
-UrlRouter.patch('/:shortUrl', urlController.patchShortUrl);
+urlRouter.post('/', urlController.createShortUrl);
+urlRouter.get('/:shortUrl', urlController.redirectShortUrl);
+urlRouter.get('/', urlController.getUserUrls);
+urlRouter.delete('/:shortUrl', urlController.deleteShortUrl);
+urlRouter.put('/:shortUrl', urlController.updateShortUrl);
+urlRouter.patch('/:shortUrl', urlController.patchShortUrl);
 
-module.exports = UrlRouter;
+module.exports = urlRouter;
