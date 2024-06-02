@@ -1,4 +1,3 @@
-version: '3'
 services:
   short-url-service:
     build: .
