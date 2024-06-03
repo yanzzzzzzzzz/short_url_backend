@@ -1,52 +1,56 @@
 # Short Url Backend
 
-## Introduction
+## Testing Environment
 
-The Short URL Backend is a service that provides URL shortening functionality to create short aliases for long URLs. This README file provides the necessary information to get started with the backend service.
+* Windows
 
-## Installation
+## Quick Start
 
-To get started with the Short URL Backend, you need to perform the following steps:
+### Requirement
 
-### Clone the repository
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+### Steps
+
+Clone the repository and run the Docker deployment script:
+  
+  ```bash
+    npm run docker-deploy
+  ```
+
+## Run in Development Mode
+
+1. Run `npm install`
+2. Create a .env file with the following content `SECRET = 1234`
+
+## Configuration
+
+### Optional Environment Variables
+
+Create a .env file to set other parameters as needed.
+
+### Google Login API
+
+Add the following parameters to the .env file for Google OAuth 2.0 authentication:
 
 ```bash
-git clone https://github.com/yanzzzzzzzzz/short_url_backend.git
+GOOGLE_CLIENT_ID=<your_google_client_id>
+GOOGLE_CLIENT_SECRET=<your_google_client_secret>
+GOOGLE_OAUTH_REDIRECT_URL=<your_google_oauth_redirect_url>
+FRONTEND_URL=<your_frontend_url_after_login_success_will_rediret>
 ```
 
-### Install dependencies
+### Other Parameters
+
+Add the following parameters to the .env file to configure MongoDB, Redis, and the server port:
 
 ```bash
-npm install
-```
-
-### Create env file
-
-Create a `.env` file with the following information:
-
-```bash
-PORT=<your_port_number>  # The port number on which the server will listen for incoming connections.
-MONGODB_URI=<your_mongodb_connection_string>  # The URI for connecting to the MongoDB database used by the application.
-TEST_MONGODB_URI=<your_mongodb_connection_string_for_test>  # The URI for connecting to the MongoDB database used for testing purposes.
-SECRET=<secret_string_use_by_jwt_token>  # The secret key used for signing and verifying JSON Web Tokens (JWTs) for authentication and authorization.
-REDIS_PASSWORD=<your_redis_password>  # The password for authenticating with the Redis database server.
-REDIS_HOST=<your_redis_host>  # The hostname of the Redis database server.
-REDIS_PORT=<your_redis_port>  # The port number on which the Redis database server is running.
-GOOGLE_CLIENT_ID=<your_google_client_id>  # The client ID for Google OAuth 2.0 authentication.
-GOOGLE_CLIENT_SECRET=<your_google_client_secret>  # The client secret for Google OAuth 2.0 authentication.
-GOOGLE_OAUTH_REDIRECT_URL=<your_google_oauth_redirectUrl>  # The redirect URL to which Google will send the authorization response.
-FRONTEND_URL=<your_front_end_Url>  # The URL of the frontend application, which is used for CORS (Cross-Origin Resource Sharing) and redirection purposes.
-
-```
-
-### Redis
-
-You can use use [Redis cloud](https://app.redislabs.com/#/databases) for Redis setup.
-
-### Start the server
-
-```bash
-npm run dev
+PORT=<your_port_number>
+MONGODB_URI=<your_mongodb_connection_string>
+TEST_MONGODB_URI=<your_mongodb_connection_string_for_test>
+REDIS_PASSWORD=<your_redis_password>
+REDIS_HOST=<your_redis_host>
+REDIS_PORT=<your_redis_port>
 ```
 
 ## API
