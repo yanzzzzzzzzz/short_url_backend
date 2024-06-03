@@ -95,7 +95,6 @@ exports.getUserUrls = async (req, res) => {
   const sanitizedUrlList = urlList.urls.map((url) => ({
     originUrl: url.originUrl,
     shortUrl: url.shortUrl,
-    createTime: url.createTime,
     previewImage: url.previewImage,
     title: url.title
   }));
