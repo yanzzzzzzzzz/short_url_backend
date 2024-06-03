@@ -48,8 +48,9 @@ Add the following parameters to the .env file to configure MongoDB, Redis, and t
 
 ```bash
 PORT=<your_port_number>
-MONGODB_URI=<your_mongodb_connection_string>
-TEST_MONGODB_URI=<your_mongodb_connection_string_for_test>
+MONGODB_URI_DOCKER=<your_mongodb_connection_string>
+MONGODB_URI_DEV=<your_mongodb_connection_string_for_dev>
+MONGODB_NAME=<your_mongodb_database_name>
 REDIS_PASSWORD=<your_redis_password>
 REDIS_HOST=<your_redis_host>
 REDIS_PORT=<your_redis_port>
