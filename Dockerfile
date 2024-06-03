@@ -13,4 +13,4 @@ RUN apt-get update && apt-get install -y redis-server
 EXPOSE 4001
 EXPOSE 6379
 
-CMD service redis-server start && node index.js
+CMD service redis-server start && npm run docker
