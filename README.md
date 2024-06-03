@@ -31,6 +31,8 @@ Create a .env file to set other parameters as needed.
 
 ### Google Login API
 
+:link:[Google OAuth 2.0](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow?hl=zh-tw)
+
 Add the following parameters to the .env file for Google OAuth 2.0 authentication:
 
 ```bash
