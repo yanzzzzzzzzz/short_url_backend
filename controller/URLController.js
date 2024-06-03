@@ -56,6 +56,7 @@ exports.redirectShortUrl = async (req, res) => {
   const { shortUrl } = req.params;
   const originalUrlOnRedis = await redisClient.get(shortUrl);
   if (originalUrlOnRedis) {
+    console.log('load url on redis');
     return res.redirect(originalUrlOnRedis);
   }
   const url = await Url.findOne({ shortUrl });
