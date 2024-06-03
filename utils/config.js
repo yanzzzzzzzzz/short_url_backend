@@ -5,7 +5,7 @@ const {
   MONGODB_URI_DEV,
   MONGODB_NAME,
   NODE_ENV,
-  PORT: ENV_PORT,
+  PORT: PORT,
   SECRET,
   REDIS_PASSWORD,
   REDIS_HOST: ENV_REDIS_HOST,
@@ -28,14 +28,14 @@ const isTest = NODE_ENV === 'test';
 const connectString = isDocker ? dockerConnectString : localConnectString;
 const dbName = isTest ? MONGODB_NAME || defaultTestDbName : MONGODB_NAME || defaultDbName;
 
-const MONGODB_URI_FINAL = `${connectString}${dbName}`;
+const MONGODB_URI = `${connectString}${dbName}`;
 const PORT = ENV_PORT || 4001;
 const REDIS_HOST = ENV_REDIS_HOST || 'localhost';
 const REDIS_PORT = ENV_REDIS_PORT || 6379;
 
 module.exports = {
   PORT,
-  MONGODB_URI: MONGODB_URI_FINAL,
+  MONGODB_URI,
   SECRET,
   REDIS_PASSWORD,
   REDIS_HOST,
