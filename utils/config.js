@@ -1,7 +1,8 @@
 require('dotenv').config();
 
 const {
-  MONGODB_URI,
+  MONGODB_URI_DOCKER,
+  MONGODB_URI_DEV,
   MONGODB_NAME,
   NODE_ENV,
   PORT: ENV_PORT,
@@ -18,8 +19,8 @@ const {
 const defaultDbName = 'URLShortenerDB';
 const defaultTestDbName = 'URLShortenerDBTest';
 
-const dockerConnectString = MONGODB_URI || 'mongodb://mongodb/';
-const localConnectString = MONGODB_URI || 'mongodb://localhost:27017/';
+const dockerConnectString = MONGODB_URI_DOCKER || 'mongodb://mongodb/';
+const localConnectString = MONGODB_URI_DEV || 'mongodb://localhost:27017/';
 
 const isDocker = NODE_ENV === 'docker';
 const isTest = NODE_ENV === 'test';
@@ -39,8 +40,8 @@ module.exports = {
   REDIS_PASSWORD,
   REDIS_HOST,
   REDIS_PORT,
-  GoogleClientId: GOOGLE_CLIENT_ID,
-  GoogleClientSecret: GOOGLE_CLIENT_SECRET,
-  GoogleOauthRedirectUrl: GOOGLE_OAUTH_REDIRECT_URL,
-  FrontEndUrl: FRONTEND_URL
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_OAUTH_REDIRECT_URL,
+  FRONTEND_URL
 };

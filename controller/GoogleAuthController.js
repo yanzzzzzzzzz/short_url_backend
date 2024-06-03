@@ -16,7 +16,7 @@ exports.auth = async (req, res) => {
     const user = await findAndUpdateUser(googleUser);
 
     auth.setAuthCookies(user, res);
-    res.redirect(config.FrontEndUrl);
+    res.redirect(config.FRONTEND_URL);
   } catch (error) {
     console.error('Error during authentication:', error.message);
     res.status(500).send('Internal Server Error');
@@ -27,9 +27,9 @@ async function getGoogleOAuthTokens(code, type) {
   const url = 'https://oauth2.googleapis.com/token';
   const values = {
     code,
-    client_id: config.GoogleClientId,
-    client_secret: config.GoogleClientSecret,
-    redirect_uri: `${config.GoogleOauthRedirectUrl}/${type}`,
+    client_id: config.GOOGLE_CLIENT_ID,
+    client_secret: config.GOOGLE_CLIENT_SECRET,
+    redirect_uri: `${config.GOOGLE_OAUTH_REDIRECT_URL}/${type}`,
     grant_type: 'authorization_code'
   };
 
