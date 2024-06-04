@@ -82,7 +82,6 @@ exports.getUserUrls = async (req, res) => {
 
   const urlList = await User.findOne({ email: user.email }).populate({
     path: 'urls',
-    select: 'originUrl shortUrl createTime previewImage title',
     match,
     options: { sort: { createTime: -1 }, skip, limit: pageSize }
   });
@@ -92,14 +91,9 @@ exports.getUserUrls = async (req, res) => {
   });
   const pageCount = Math.ceil(userCount.urls.length / pageSize);
   const hasNext = page < pageCount;
-  const sanitizedUrlList = urlList.urls.map((url) => ({
-    originUrl: url.originUrl,
-    shortUrl: url.shortUrl,
-    previewImage: url.previewImage,
-    title: url.title
-  }));
+
   res.json({
-    content: sanitizedUrlList,
+    content: urlList.urls,
     pagination: {
       page,
       size: pageSize,
