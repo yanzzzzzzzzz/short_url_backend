@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 const urlSchema = new mongoose.Schema({
   createTime: {
-    type: String,
+    type: Date,
     default: Date.now
   },
   updateTime: {
-    type: String,
+    type: Date,
     default: Date.now
   },
   expiredTime: {
-    type: String
+    type: Date
   },
   title: {
     type: String
