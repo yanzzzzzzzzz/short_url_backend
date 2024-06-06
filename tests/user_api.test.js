@@ -111,49 +111,6 @@ describe('POST /api/users', () => {
   }, 50000);
 });
 
-describe('GET /api/users', () => {
-  beforeEach(async () => {
-    await User.deleteMany({});
-    await Url.deleteMany({});
-
-    for (let initialUser of helper.initialUsers) {
-      const passwordHash = await bcrypt.hash(initialUser.password, 10);
-      const user = new User({
-        username: initialUser.username,
-        email: initialUser.email,
-        passwordHash
-      });
-      await user.save();
-    }
-    let testUser = await User.findOne({ username: helper.initialUsers[0].username });
-    for (let index = 0; index < helper.initialUrls.length; index++) {
-      const urlData = helper.initialUrls[index];
-      const urlModel = new Url({
-        originUrl: urlData.originUrl,
-        shortUrl: urlData.shortUrl,
-        user: testUser._id
-      });
-      const savedUrl = await urlModel.save();
-      testUser = await User.findById(testUser._id);
-      testUser.urls = testUser.urls.concat(savedUrl._id);
-      await testUser.save();
-    }
-  });
-  test('get all user', async () => {
-    const response = await api.get('/api/users');
-    expect(response.body).toHaveLength(helper.initialUsers.length);
-  });
-  test('should retrieve short URLs created by a specific user', async () => {
-    const existingUser = helper.initialUsers[0];
-
-    const response = await api
-      .get(`/api/users/${existingUser.username}`)
-      .expect(200)
-      .expect('Content-Type', /application\/json/);
-    expect(response.body.urls).toHaveLength(helper.initialUrls.length);
-  });
-});
-
 afterAll(async () => {
   await redisClient.disconnect();
   await mongoose.connection.close();

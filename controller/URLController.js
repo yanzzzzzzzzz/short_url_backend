@@ -43,10 +43,6 @@ exports.createShortUrl = async (req, res) => {
   const urlModel = new Url(urlObj);
   const savedUrl = await urlModel.save();
   await redisClient.set(shortUrl, originUrl, 'EX', 60 * 60);
-  if (user) {
-    user.urls.push(savedUrl._id);
-    await user.save();
-  }
   res.status(201).json(savedUrl);
 };
 
@@ -74,24 +70,22 @@ exports.getUserUrls = async (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 0;
   const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 1000;
 
-  const skip = page > 0 ? page * pageSize : 0;
-  const searchKeyword = req.query.searchKeyword;
-  const match = searchKeyword ? { title: { $regex: searchKeyword, $options: 'i' } } : {};
+  let query = { user: user._id.toString() };
+  if (req.query.searchKeyword) {
+    query.title = { $regex: new RegExp(req.query.searchKeyword, 'i') };
+  }
+  const urls = await Url.find(query)
+    .sort({ createTime: -1 })
+    .skip(pageSize * page)
+    .limit(pageSize)
+    .exec();
 
-  const urlList = await User.findOne({ email: user.email }).populate({
-    path: 'urls',
-    match,
-    options: { sort: { createTime: -1 }, skip, limit: pageSize }
-  });
-  const userCount = await User.findOne({ email: user.email }).populate({
-    path: 'urls',
-    match
-  });
-  const pageCount = Math.ceil(userCount.urls.length / pageSize);
+  const count = await Url.countDocuments(query).exec();
+  const pageCount = Math.ceil(count / pageSize);
   const hasNext = page < pageCount;
 
   res.json({
-    content: urlList.urls,
+    content: urls,
     pagination: {
       page,
       size: pageSize,

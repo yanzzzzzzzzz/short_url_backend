@@ -38,11 +38,6 @@ function isValidEmail(email) {
   return emailPattern.test(email);
 }
 
-exports.getUserCreateUrls = async (req, res) => {
-  const users = await User.find({}).populate('urls');
-  res.json(users);
-};
-
 exports.getUser = async (req, res) => {
   const { username } = req.params;
   const user = await User.findOne({ username });

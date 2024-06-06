@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 let testUser = { username: 'test', email: 'test@gmail.com', password: '1234' };
 let testUser2 = { username: 'test2', email: 'test2@gmail.com', password: '1234' };
 let cookie, cookie2;
+let savedUser, savedUser2;
 const createUser = async (userData) => {
   const passwordHash = await bcrypt.hash(userData.password, 10);
   const user = new User({
@@ -30,8 +31,7 @@ const addUrlsToUser = async (user, urls) => {
       title: url.title,
       user: user._id
     });
-    const savedUrl = await urlModel.save();
-    await User.updateOne({ _id: user._id }, { $push: { urls: savedUrl._id } });
+    await urlModel.save();
   });
 
   await Promise.all(urlPromises);
@@ -41,9 +41,9 @@ beforeEach(async () => {
   await User.deleteMany({});
   await Url.deleteMany({});
 
-  const savedUser = await createUser(testUser);
+  savedUser = await createUser(testUser);
 
-  await createUser(testUser2);
+  savedUser2 = await createUser(testUser2);
 
   await addUrlsToUser(savedUser, helper.initialUrls);
   const loginResponse = await api
@@ -100,32 +100,23 @@ describe('GET /api/url', () => {
 
 describe('POST /api/url', () => {
   test('adds a new url with valid input', async () => {
-    const urlsAtStart = await User.findOne({ email: testUser.email }).populate({
-      path: 'urls'
-    });
+    const urlsAtStart = await Url.find({ user: savedUser._id.toString() });
     await api
       .post('/api/url')
       .set('Cookie', cookie)
       .send({ url: helper.vaildUrl })
       .expect(201)
       .expect('Content-Type', /application\/json/);
-    const urlsAtEnd = await User.findOne({ email: testUser.email }).populate({
-      path: 'urls'
-    });
+    const urlsAtEnd = await Url.find({ user: savedUser._id.toString() });
 
-    expect(urlsAtEnd.urls).toHaveLength(urlsAtStart.urls.length + 1);
+    expect(urlsAtEnd).toHaveLength(urlsAtStart.length + 1);
   });
 
   test('returns a 400 status with invalid input', async () => {
-    const urlsAtStart = await User.findOne({ email: testUser.email }).populate({
-      path: 'urls'
-    });
+    const urlsAtStart = await Url.find({ user: savedUser._id.toString() });
     await api.post('/api/url').set('Cookie', cookie).send({ url: helper.invaildUrl }).expect(400);
-    const user = await User.findOne({ email: testUser.email });
-    const urlsAtEnd = await User.findOne({ email: testUser.email }).populate({
-      path: 'urls'
-    });
-    expect(urlsAtEnd.urls).toHaveLength(urlsAtStart.urls.length);
+    const urlsAtEnd = await Url.find({ user: savedUser._id.toString() });
+    expect(urlsAtEnd).toHaveLength(urlsAtStart.length);
   });
 
   test('adding a new url with valid input but no token provided is okay', async () => {

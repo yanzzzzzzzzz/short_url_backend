@@ -4,13 +4,7 @@ const userSchema = new mongoose.Schema({
   username: String,
   passwordHash: String,
   email: String,
-  googleId: String,
-  urls: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Url'
-    }
-  ]
+  googleId: String
 });
 
 userSchema.set('toJSON', {
