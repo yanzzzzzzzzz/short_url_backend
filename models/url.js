@@ -52,7 +52,7 @@ urlSchema.pre('save', function (next) {
   this.updateTime = formatDate(now);
 
   if (!this.createTime) {
-    this.createTime = now;
+    this.createTime = formatDate(now);
   }
 
   if (!this.expiredTime) {
