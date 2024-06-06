@@ -34,7 +34,6 @@ exports.createShortUrl = async (req, res) => {
 
   const urlInfo = await getUrlInfo(originUrl);
   const urlObj = {
-    createTime: new Date().toISOString().replace('T', ' ').substring(0, 19),
     title: urlInfo.title,
     previewImage: urlInfo.previewImage,
     originUrl,
@@ -48,8 +47,7 @@ exports.createShortUrl = async (req, res) => {
     user.urls.push(savedUrl._id);
     await user.save();
   }
-
-  res.status(201).json(urlObj);
+  res.status(201).json(savedUrl);
 };
 
 exports.redirectShortUrl = async (req, res) => {
