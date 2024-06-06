@@ -25,10 +25,12 @@ const errorHandler = (error, _request, response, next) => {
       error: error.message
     });
   } else if (error.name === 'JsonWebTokenError') {
+    console.log('JsonWebTokenError');
     return response.status(401).json({
       error: 'invalid token'
     });
   } else if (error.name === 'TokenExpiredError') {
+    console.log('TokenExpiredError');
     return response.status(401).json({
       error: 'token expired'
     });
@@ -44,12 +46,7 @@ const userExtractor = async (request, _response, next) => {
   next();
 };
 const tokenExtractor = (request, _response, next) => {
-  const authorization = request.get('authorization');
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    request.token = authorization.substring(7);
-  } else {
-    request.token = request.cookies?.customToken;
-  }
+  request.token = request.cookies?.customToken;
   next();
 };
 module.exports = {

@@ -9,10 +9,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const redisClient = require('../Service/RedisService');
 const mongoose = require('mongoose');
-let token = null;
-let token2 = null;
 let testUser = { username: 'test', email: 'test@gmail.com', password: '1234' };
 let testUser2 = { username: 'test2', email: 'test2@gmail.com', password: '1234' };
+let cookie, cookie2;
 const createUser = async (userData) => {
   const passwordHash = await bcrypt.hash(userData.password, 10);
   const user = new User({
@@ -43,19 +42,27 @@ beforeEach(async () => {
   await Url.deleteMany({});
 
   const savedUser = await createUser(testUser);
-  token = jwt.sign({ id: savedUser.id }, config.SECRET);
 
-  const savedUser2 = await createUser(testUser2);
-  token2 = jwt.sign({ id: savedUser2.id }, config.SECRET);
+  await createUser(testUser2);
 
   await addUrlsToUser(savedUser, helper.initialUrls);
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ email: testUser.email, password: testUser.password })
+    .expect(200);
+  cookie = loginResponse.headers['set-cookie'];
+
+  const loginResponse2 = await api
+    .post('/api/login')
+    .send({ email: testUser2.email, password: testUser2.password })
+    .expect(200);
+  cookie2 = loginResponse2.headers['set-cookie'];
 }, 50000);
 
 describe('GET /api/url', () => {
   test('should return urls as JSON', async () => {
-    const response = await api.get('/api/url').set('Authorization', `Bearer ${token}`);
+    const response = await api.get('/api/url').set('Cookie', cookie).expect(200);
 
-    expect(response.status).toBe(200);
     expect(response.body.content.length).toBe(helper.initialUrls.length);
   }, 50000);
   test('search keyword return right result', async () => {
@@ -63,9 +70,9 @@ describe('GET /api/url', () => {
     const keyword = 'myblog';
     const response = await api
       .get(`/api/url?searchKeyword=${keyword}`)
-      .set('Authorization', `Bearer ${token}`);
+      .set('Cookie', cookie)
+      .expect(200);
 
-    expect(response.status).toBe(200);
     expect(response.body.content.length).toBe(
       urlAtStart.filter((u) => u.title.toLowerCase().includes(keyword.toLowerCase())).length
     );
@@ -75,7 +82,8 @@ describe('GET /api/url', () => {
     const pageSize = 3;
     const response = await api
       .get(`/api/url?page=0&pageSize=${pageSize}`)
-      .set('Authorization', `Bearer ${token}`);
+      .set('Cookie', cookie)
+      .expect(200);
 
     let len;
     if (urlAtStart.length <= pageSize) {
@@ -83,7 +91,6 @@ describe('GET /api/url', () => {
     } else {
       len = pageSize;
     }
-    expect(response.status).toBe(200);
     expect(response.body.content.length).toBe(len);
   }, 50000);
   test('Attempt to access a non-existent short URL', async () => {
@@ -98,7 +105,7 @@ describe('POST /api/url', () => {
     });
     await api
       .post('/api/url')
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .send({ url: helper.vaildUrl })
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -113,11 +120,7 @@ describe('POST /api/url', () => {
     const urlsAtStart = await User.findOne({ email: testUser.email }).populate({
       path: 'urls'
     });
-    await api
-      .post('/api/url')
-      .set('Authorization', `bearer ${token}`)
-      .send({ url: helper.invaildUrl })
-      .expect(400);
+    await api.post('/api/url').set('Cookie', cookie).send({ url: helper.invaildUrl }).expect(400);
     const user = await User.findOne({ email: testUser.email });
     const urlsAtEnd = await User.findOne({ email: testUser.email }).populate({
       path: 'urls'
@@ -137,7 +140,7 @@ describe('POST /api/url', () => {
     const allUrls = await Url.find({});
     await api
       .post('/api/url')
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .send({ url: allUrls[0].originUrl, customShortUrl: allUrls[0].shortUrl })
       .expect(409)
       .expect('Content-Type', /application\/json/);
@@ -147,7 +150,7 @@ describe('POST /api/url', () => {
     const customShortUrl = '213qweasd';
     await api
       .post('/api/url')
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .send({ url: helper.vaildUrl, customShortUrl })
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -162,10 +165,7 @@ describe('DELETE api/url', () => {
   test('should remove an existing URL', async () => {
     const urlAtStart = await helper.urlsInDb();
     const urlToDelete = urlAtStart[0];
-    await api
-      .delete(`/api/url/${urlToDelete.shortUrl}`)
-      .set('Authorization', `bearer ${token}`)
-      .expect(204);
+    await api.delete(`/api/url/${urlToDelete.shortUrl}`).set('Cookie', cookie).expect(204);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length - 1);
 
@@ -175,10 +175,7 @@ describe('DELETE api/url', () => {
   test("User can't delete another user create url", async () => {
     const urlAtStart = await helper.urlsInDb();
     const urlToDelete = urlAtStart[0];
-    await api
-      .delete(`/api/url/${urlToDelete.shortUrl}`)
-      .set('Authorization', `bearer ${token2}`)
-      .expect(403);
+    await api.delete(`/api/url/${urlToDelete.shortUrl}`).set('Cookie', cookie2).expect(403);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
   });
@@ -191,7 +188,7 @@ describe('PUT api/url', () => {
     await api
       .put(`/api/url/${urlToUpdate.shortUrl}`)
       .send({ originUrl: helper.vaildUrl, shortUrl: helper.updateShortUrl })
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .expect(200);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
@@ -209,7 +206,7 @@ describe('PATCH', () => {
     await api
       .patch(`/api/url/${urlToUpdate.shortUrl}`)
       .send({ newShortUrl: helper.updateShortUrl, newTitle: updateTitle })
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .expect(200);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
@@ -225,7 +222,7 @@ describe('PATCH', () => {
     await api
       .patch(`/api/url/${urlToUpdate.shortUrl}`)
       .send({ newTitle: updateTitle })
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .expect(200);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
@@ -240,7 +237,7 @@ describe('PATCH', () => {
     await api
       .patch(`/api/url/${urlToUpdate.shortUrl}`)
       .send({ newShortUrl: helper.updateShortUrl })
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .expect(200);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
@@ -253,7 +250,7 @@ describe('PATCH', () => {
     await api
       .patch(`/api/url/${urlToUpdate.shortUrl}`)
       .send({ newShortUrl: urlAtStart[1].shortUrl })
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .expect(409);
   });
 
@@ -264,7 +261,7 @@ describe('PATCH', () => {
     await api
       .patch(`/api/url/${urlToUpdate.shortUrl}`)
       .send({ newShortUrl: urlToUpdate.shortUrl, newTitle: updateTitle })
-      .set('Authorization', `bearer ${token}`)
+      .set('Cookie', cookie)
       .expect(200);
     const urlAtEnd = await helper.urlsInDb();
     expect(urlAtEnd).toHaveLength(helper.initialUrls.length);
