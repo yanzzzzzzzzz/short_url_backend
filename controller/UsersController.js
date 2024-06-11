@@ -39,7 +39,5 @@ function isValidEmail(email) {
 }
 
 exports.getUser = async (req, res) => {
-  const { username } = req.params;
-  const user = await User.findOne({ username });
-  res.json(user);
+  res.json(req.user);
 };

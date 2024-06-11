@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(middleware.requestLogger);
 app.use(middleware.tokenExtractor);
 app.use('/api/url', middleware.userExtractor, urlRouter);
-app.use('/api/users', usersRouter);
+app.use('/api/users', middleware.userExtractor, usersRouter);
 app.use('/api/login', loginRouter);
 app.use('/api/sessions/oauth/google', googleAuthRouter);
 app.use('/api/logout', logoutRouter);
