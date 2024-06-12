@@ -41,3 +41,23 @@ function isValidEmail(email) {
 exports.getUser = async (req, res) => {
   res.json(req.user);
 };
+
+exports.updateUser = async (req, res) => {
+  try {
+    var update = {};
+    const { username, email } = req.body;
+    if (username) {
+      update.username = username;
+    }
+    if (email) {
+      update.email = email;
+    }
+    const savedUser = await User.findByIdAndUpdate(req.user.id, update, {
+      new: true,
+      runValidators: true
+    });
+    res.status(204).json({ username: savedUser.username, email: savedUser.email });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+};
