@@ -90,7 +90,7 @@ describe('POST /api/users', () => {
     expect(usersAtEnd).toHaveLength(usersAtStart.length);
   });
 
-  test('creation fails with proper statuscode and message if email already exist', async () => {
+  test('creation fails with proper status code and message if email already exist', async () => {
     const usersAtStart = await helper.usersInDb();
 
     const newUser = {
