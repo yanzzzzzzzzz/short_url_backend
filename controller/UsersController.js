@@ -61,3 +61,15 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ error });
   }
 };
+
+exports.deleteUser = async (req, res) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'please login' });
+    }
+    await User.findByIdAndDelete(req.user.id);
+    res.status(204).end();
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+};
