@@ -65,7 +65,7 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     if (!req.user) {
-      res.status(401).json({ error: 'please login' });
+      return res.status(401).json({ error: 'please login' });
     }
     await User.findByIdAndDelete(req.user.id);
     res.status(204).end();
