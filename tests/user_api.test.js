@@ -29,7 +29,7 @@ describe('POST /api/users', () => {
     const newUser = {
       username: 'test777',
       email: 'test777@yahoo.com.tw',
-      password: 'test777'
+      password: 'test7777'
     };
 
     await api
@@ -70,7 +70,7 @@ describe('POST /api/users', () => {
     };
 
     const result = await api.post('/api/users').send(newUser).expect(400);
-    expect(result.body.error).toContain('password can not be null');
+    expect(result.body.error).toContain("password can't be null");
     const usersAtEnd = await helper.usersInDb();
     expect(usersAtEnd).toHaveLength(usersAtStart.length);
   });
