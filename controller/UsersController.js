@@ -11,11 +11,14 @@ exports.createUser = async (req, res) => {
   if (existingUser) {
     return res.status(400).json({ error: 'This email is already registered' });
   }
-  if (username.length < 3) {
-    return res.status(400).json({ error: 'username length too short' });
+  if (username.length < 5) {
+    return res.status(400).json({ error: 'user name length need to more than 5' });
   }
   if (!password || password.length == 0) {
-    return res.status(400).json({ error: 'password can not be null' });
+    return res.status(400).json({ error: "password can't be null" });
+  }
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'password length need to more than 8' });
   }
 
   const saltRounts = 10;
