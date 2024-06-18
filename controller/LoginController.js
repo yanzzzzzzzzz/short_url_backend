@@ -3,7 +3,6 @@ const User = require('../models/user');
 const auth = require('../utils/auth');
 const config = require('../utils/config');
 const jwt = require('jsonwebtoken');
-const expiredSecond = 3600;
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
