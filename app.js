@@ -6,6 +6,7 @@ const urlRouter = require('./routes/urlRouter');
 const usersRouter = require('./routes/usersRouter');
 const loginRouter = require('./routes/loginRouter');
 const googleAuthRouter = require('./routes/googleAuthRouter');
+const facebookAuthRouter = require('./routes/facebookAuthRouter');
 const logoutRouter = require('./routes/logoutRouter');
 const middleware = require('./utils/middleware');
 const config = require('./utils/config');
@@ -34,6 +35,8 @@ app.use('/api/url', middleware.userExtractor, urlRouter);
 app.use('/api/users', middleware.userExtractor, usersRouter);
 app.use('/api/login', loginRouter);
 app.use('/api/sessions/oauth/google', googleAuthRouter);
+app.use('/api/sessions/oauth/facebook', facebookAuthRouter);
+
 app.use('/api/logout', logoutRouter);
 app.use(middleware.errorHandler);
 app.use(middleware.unknownEndpoint);
