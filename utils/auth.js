@@ -19,10 +19,6 @@ async function setAuthCookies(user, res) {
     httpOnly: true,
     expires: expirationDate
   });
-
-  setCookie(res, 'username', user.username, {
-    expires: expirationDate
-  });
 }
 
 module.exports = {
