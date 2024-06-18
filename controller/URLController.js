@@ -1,5 +1,4 @@
 const Url = require('../models/url');
-const User = require('../models/user');
 const { generateRandomString } = require('../utils/randomString');
 const redisClient = require('../Service/RedisService');
 const { getUrlInfo, isValidUrl } = require('../utils/url');
