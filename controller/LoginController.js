@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const auth = require('../utils/auth');
+const auth = require('../utils/authUtils');
 const config = require('../utils/config');
 const jwt = require('jsonwebtoken');
 
@@ -22,7 +22,7 @@ exports.login = async (req, res) => {
 };
 
 exports.authentication = async (req, res) => {
-  const token = req.cookies.customToken;
+  const token = req.cookies.authToken;
   if (!token) {
     return res.sendStatus(401);
   }

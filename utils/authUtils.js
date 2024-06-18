@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken');
 const config = require('./config');
-const expiredSecond = 3600;
+const TOKEN_EXPIRATION_SECONDS = 3600;
 function generateJwtToken(user) {
   return jwt.sign({ id: user._id }, config.SECRET, {
-    expiresIn: expiredSecond
+    expiresIn: TOKEN_EXPIRATION_SECONDS
   });
 }
 
@@ -13,9 +13,9 @@ function setCookie(res, name, value, options) {
 
 async function setAuthCookies(user, res) {
   const token = generateJwtToken(user);
-  const expirationDate = new Date(Date.now() + expiredSecond * 1000);
+  const expirationDate = new Date(Date.now() + TOKEN_EXPIRATION_SECONDS * 1000);
 
-  setCookie(res, 'customToken', token, {
+  setCookie(res, 'authToken', token, {
     httpOnly: true,
     expires: expirationDate
   });

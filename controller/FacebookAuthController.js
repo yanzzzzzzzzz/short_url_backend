@@ -1,6 +1,6 @@
 const config = require('../utils/config');
 const User = require('../models/user');
-const auth = require('../utils/auth');
+const authUtils = require('../utils/authUtils');
 
 exports.callback = async (req, res) => {
   try {
@@ -39,7 +39,7 @@ exports.callback = async (req, res) => {
     );
     const profileJson = await profileRes.json();
     const user = await findAndUpdateUser(profileJson.id, profileJson.email, profileJson.short_name);
-    await auth.setAuthCookies(user, res);
+    await authUtils.setAuthCookies(user, res);
     res.redirect(config.FRONTEND_URL);
   } catch (error) {
     console.error('Error during authentication:', error.message);

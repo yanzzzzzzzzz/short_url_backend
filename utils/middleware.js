@@ -46,7 +46,7 @@ const userExtractor = async (request, _response, next) => {
   next();
 };
 const tokenExtractor = (request, _response, next) => {
-  request.token = request.cookies?.customToken;
+  request.token = request.cookies?.authToken;
   next();
 };
 module.exports = {

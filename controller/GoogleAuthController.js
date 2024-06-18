@@ -2,7 +2,7 @@ const axios = require('axios');
 const qs = require('qs');
 const User = require('../models/user');
 const config = require('../utils/config');
-const auth = require('../utils/auth');
+const authUtils = require('../utils/authUtils');
 
 exports.auth = async (req, res) => {
   try {
@@ -15,7 +15,7 @@ exports.auth = async (req, res) => {
     }
     const user = await findAndUpdateUser(googleUser);
 
-    auth.setAuthCookies(user, res);
+    authUtils.setAuthCookies(user, res);
     res.redirect(config.FRONTEND_URL);
   } catch (error) {
     console.error('Error during authentication:', error.message);
