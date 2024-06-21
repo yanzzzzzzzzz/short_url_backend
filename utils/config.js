@@ -23,7 +23,7 @@ const defaultDbName = 'URLShortenerDB';
 const defaultTestDbName = 'URLShortenerDBTest';
 
 const dockerConnectString = MONGODB_URI_DOCKER || 'mongodb://mongodb/';
-const localConnectString = MONGODB_URI_DEV || 'mongodb://localhost:27017/';
+const localConnectString = MONGODB_URI_DEV || 'mongodb://localhost:27018/';
 
 const isDocker = NODE_ENV === 'docker';
 const isTest = NODE_ENV === 'test';
