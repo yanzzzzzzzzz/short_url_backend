@@ -43,7 +43,6 @@ function addOneHour(date) {
 }
 
 urlSchema.pre('save', function (next) {
-  console.log('save');
   const date = new Date();
   this.updateTime = date;
   if (!this.expiredTime) {
