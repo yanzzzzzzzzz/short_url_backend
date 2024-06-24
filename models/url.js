@@ -5,8 +5,7 @@ const urlSchema = new mongoose.Schema({
     default: Date.now
   },
   updateTime: {
-    type: Date,
-    default: Date.now
+    type: Date
   },
   expiredTime: {
     type: Date
@@ -39,24 +38,16 @@ urlSchema.set('toJSON', {
   }
 });
 
-function formatDate(date) {
-  return date.toISOString().replace('T', ' ').substring(0, 19);
-}
-
 function addOneHour(date) {
   return new Date(date.getTime() + 60 * 60 * 1000);
 }
 
 urlSchema.pre('save', function (next) {
-  const now = new Date();
-  this.updateTime = formatDate(now);
-
-  if (!this.createTime) {
-    this.createTime = formatDate(now);
-  }
-
+  console.log('save');
+  const date = new Date();
+  this.updateTime = date;
   if (!this.expiredTime) {
-    this.expiredTime = formatDate(addOneHour(now));
+    this.expiredTime = addOneHour(date);
   }
   next();
 });
