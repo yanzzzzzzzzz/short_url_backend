@@ -24,6 +24,11 @@ jobs:
         with:
           mongodb-version: ${{ matrix.mongodb-version }}
 
+      - name: Setup redis
+        uses: shogo82148/actions-setup-redis@v1
+        with:
+          redis-version: '7.x'
+
       - run: npm install
 
       - run: npm test
