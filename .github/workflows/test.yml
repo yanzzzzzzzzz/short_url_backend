@@ -5,24 +5,20 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x]
-        mongodb-version: ['7.0']
-
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 16.18.0
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16.18.0'
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.11.0
         with:
-          mongodb-version: ${{ matrix.mongodb-version }}
+          mongodb-version: '7.0'
+          mongodb-port: 27018
 
       - name: Setup redis
         uses: shogo82148/actions-setup-redis@v1
